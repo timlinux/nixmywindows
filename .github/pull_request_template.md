@@ -49,4 +49,4 @@ Fixes #(issue number)
 <!-- Add any additional notes, concerns, or considerations here -->
 
 ## Code of Conduct
-By submitting this PR, I confirm that my contribution is made under the terms of the project's license and I agree to follow the Code of Conduct.
+By submitting this PR, I confirm that my contribution is made under the terms of the project's license and I agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).

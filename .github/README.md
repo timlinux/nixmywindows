@@ -21,4 +21,4 @@ This directory contains GitHub-specific configuration files and documentation fo
 
 ## Contributing
 
-Please see the [CONTRIBUTING.md](../CONTRIBUTING.md) file in the project root for detailed contribution guidelines.
+Please see the [CONTRIBUTING.md](CONTRIBUTING.md) file for detailed contribution guidelines.

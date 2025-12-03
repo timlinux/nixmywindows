@@ -112,11 +112,53 @@ nix run .#vm
 
 ## 📖 Documentation
 
+### Project Documentation
+- [**Project Requirements**](REQUIREMENTS.md) - Original project vision and requirements
+- [**Brand Guidelines**](./.github/BRAND.md) - Visual identity, colors, typography, and design principles
+- [**Contributing Guide**](./.github/CONTRIBUTING.md) - How to contribute to the project
+- [**Code of Conduct**](./.github/CODE_OF_CONDUCT.md) - Community guidelines and behavior standards
+- [**CLA Agreement**](./.github/CLA.md) - Contributor License Agreement
+- [**Claude Configuration**](./.github/CLAUDE.md) - AI assistance directives and project context
+
+### Technical Documentation (Coming Soon)
 - [Installation Guide](./.github/docs/installation.md)
 - [Configuration Reference](./.github/docs/configuration.md)
 - [Terminal Tools Guide](./.github/docs/terminal-tools.md)
 - [ZFS Management](./.github/docs/zfs.md)
 - [Troubleshooting](./.github/docs/troubleshooting.md)
+
+### Development Resources
+- [**Development Setup**](./.github/CONTRIBUTING.md#development-setup) - Quick start for developers
+- [**Quality Assurance**](#quality-assurance) - Our comprehensive QA system
+- [**Issue Templates**](./.github/ISSUE_TEMPLATE/) - Bug reports, feature requests, and questions
+- [**Assets Directory**](./.github/assets/README.md) - Visual assets and branding resources
+
+## 🔧 Quality Assurance
+
+We maintain high code quality through comprehensive automated checking:
+
+### Pre-commit Hooks
+- **Nix**: nixfmt formatter for consistent Nix code style
+- **Shell Scripts**: shellcheck linting for bash script quality
+- **Markdown**: markdownlint for documentation consistency
+- **Python**: black + isort + flake8 + mypy for comprehensive Python QA
+- **Go**: gofmt + golangci-lint + go-vet for Go code quality
+- **HTML/CSS**: djLint + prettier for web content formatting
+- **Security**: detect-secrets for preventing credential leaks
+
+### GitHub Actions CI
+- All pre-commit checks run automatically on PRs
+- Language-specific quality jobs run conditionally
+- Security scanning with Trivy vulnerability detection
+- Comprehensive build and test validation
+
+### Developer Setup
+```bash
+# Quick setup - run from repository root
+./scripts/setup-dev.sh
+```
+
+This sets up all pre-commit hooks and development tools automatically.
 
 ## 🏗️ Architecture
 
