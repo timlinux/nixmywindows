@@ -73,7 +73,10 @@ cd nixmywindows
 # Add the upstream repository as a remote
 git remote add upstream https://github.com/timlinux/nixmywindows.git
 
-# Enter the development shell
+# Run the development setup script (sets up pre-commit hooks and tools)
+./scripts/setup-dev.sh
+
+# Enter the development shell (if using Nix)
 nix develop
 
 # Build the system to test your changes

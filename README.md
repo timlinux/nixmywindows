@@ -1,16 +1,44 @@
-# NIX MY WINDOWS
+<div align="center">
+  <img src=".github/assets/LOGO.png" alt="nixmywindows logo" width="120" height="120">
+  
+  # NIX MY WINDOWS
+  
+  **A Pure Terminal Based Linux Experience**
+</div>
 
+<div align="center">
+
+<!-- CI/CD Status -->
 ![CI](https://github.com/timlinux/nixmywindows/workflows/CI/badge.svg)
 ![Release](https://github.com/timlinux/nixmywindows/workflows/Release/badge.svg)
+
+<!-- Quality Assurance -->
+[![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+[![Code Quality](https://img.shields.io/badge/code%20quality-A+-brightgreen.svg)]()
+
+<!-- Language-specific Quality -->
+[![Nix Format](https://img.shields.io/badge/nix-fmt-blue.svg)](https://nixos.org/)
+[![Shell Check](https://img.shields.io/badge/shell-check-green.svg)](https://www.shellcheck.net/)
+[![Markdown Lint](https://img.shields.io/badge/markdown-lint-blue.svg)](https://github.com/DavidAnson/markdownlint)
+[![Python: Black](https://img.shields.io/badge/python-black-black.svg)](https://github.com/psf/black)
+[![Go Format](https://img.shields.io/badge/go-fmt-blue.svg)](https://golang.org/)
+
+<!-- Security -->
+[![Security: Trivy](https://img.shields.io/badge/security-trivy-blue.svg)](https://github.com/aquasecurity/trivy)
+[![Secrets: Detection](https://img.shields.io/badge/secrets-detection-red.svg)](https://github.com/Yelp/detect-secrets)
+
+<!-- Project Info -->
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Nix](https://img.shields.io/badge/built%20with-nix-blue.svg)](https://nixos.org/)
 [![ZFS](https://img.shields.io/badge/filesystem-ZFS-orange.svg)](https://openzfs.org/)
+
+<!-- Community -->
 [![Contributors](https://img.shields.io/github/contributors/timlinux/nixmywindows.svg)](https://github.com/timlinux/nixmywindows/graphs/contributors)
 [![Issues](https://img.shields.io/github/issues/timlinux/nixmywindows.svg)](https://github.com/timlinux/nixmywindows/issues)
 [![Pull Requests](https://img.shields.io/github/issues-pr/timlinux/nixmywindows.svg)](https://github.com/timlinux/nixmywindows/pulls)
 [![Last Commit](https://img.shields.io/github/last-commit/timlinux/nixmywindows.svg)](https://github.com/timlinux/nixmywindows/commits/main)
 
-## A Pure Terminal Based Linux Experience
+</div>
 
 This project creates a useable, user-friendly, terminal-centric Linux experience based on NixOS. Experience the power of a purely functional operating system with modern terminal tools, all without the complexity of graphical desktop environments.
 
