@@ -140,21 +140,21 @@ TABLE_HEADER="| Avatar | GitHub | Contributions |"
 TABLE_SEPARATOR="|--------|--------|---------------|"
 TABLE_ROWS=""
 
-# Process each contributor
-echo "$ALL_CONTRIBUTORS" | jq -c '.[]' | while read -r contributor; do
+# Process each contributor using process substitution to avoid subshell
+while IFS= read -r contributor; do
     LOGIN=$(echo "$contributor" | jq -r '.login')
     AVATAR_URL=$(echo "$contributor" | jq -r '.avatar_url')
     CONTRIBUTIONS=$(echo "$contributor" | jq -r '.contributions')
     PROFILE_URL=$(echo "$contributor" | jq -r '.html_url')
-    
+
     # Skip bots if desired (optional)
     # if [[ "$LOGIN" == *"[bot]"* ]]; then
     #     continue
     # fi
-    
+
     ROW="| <img src=\"$AVATAR_URL\" width=\"64\" height=\"64\" alt=\"$LOGIN\"> | [$LOGIN]($PROFILE_URL) | $CONTRIBUTIONS |"
     TABLE_ROWS="${TABLE_ROWS}${ROW}\n"
-done
+done < <(echo "$ALL_CONTRIBUTORS" | jq -c '.[]')
 
 # Construct the full table
 NEW_CONTENT="<!-- CONTRIBUTORS_START -->\n"
