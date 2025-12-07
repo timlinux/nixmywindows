@@ -119,5 +119,58 @@ do the qa (eg precommit, nixpkgs-fmt, shellcheck etc) and nix etc.
 It should be inspired by projects like Awesome Readme to make it the very best
 readme possible.
 
+I want the contributors to be a table because I am hoping more will come!
+Include their github avatars and links to their github pages.
+
+Add an automated step (in a release workflow or a small script) to regenerate
+the contributors table from GitHub's API so it stays in sync;
+
+Open a pull request with this README change for you, or push it directly if you
+prefer (tell me which repo/branch to target and I'll create the PR).
 
 
+Preparing the flake
+
+I want this project to have a flake.nix and a nix develop environment that is
+automatically set up when I enter the project folder by way or direnv.
+
+The flake should provide all the development tools needed to work on this repo.
+
+The goal of this flake is to be able to use nixos anywhere to install a remote
+(or local) nixos that is described by this repo.
+
+We should also have a few other key components. Everything should be as modular
+as possible. Split the configuation into separate nix moduls as needed using
+the directory structure below as a guide:Guidelines
+
+/
+  modules
+  hosts
+  scripts
+  profiles
+  software
+  users
+
+This represents a heirarchy of configuration where:
+
+Software is collated into profiles which are then applied to hosts via modules.
+
+Each host will be able to have host specific configuration as needed.
+
+Users can be defined glolbally and attached to hosts as needed.
+
+The host folder will have one subfolder per host (eg my laptop, a remote server
+etc).
+
+In that subfolder we will separate concerns so that we have these principle
+concepts:
+
+  - hardware configuration
+  - system configuration
+  - services configuration
+  - networking configuration
+  - security configuration
+  - users configuration
+  - disks configuration
+
+Disk configuration should be managed by disko.
