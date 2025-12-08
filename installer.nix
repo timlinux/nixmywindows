@@ -14,6 +14,10 @@
       source = ./README.txt;
       target = "/README.txt";
     }
+    {
+      source = ./scripts/install.sh;
+      target = "/install.sh";
+    }
   ];
 
   # Basic packages for installation
@@ -28,6 +32,7 @@
     e2fsprogs
     dosfstools
     zfs
+    disko
   ];
 
   # Enable SSH
@@ -38,6 +43,9 @@
   networking.useDHCP = lib.mkForce true;
   networking.networkmanager.enable = lib.mkForce true;
   networking.firewall.enable = lib.mkForce false;
+
+  # Enable flakes and nix-command for disko and nixos-install
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   system.stateVersion = "24.05";
 }
