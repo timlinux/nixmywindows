@@ -42,6 +42,8 @@
 
 This project creates a useable, user-friendly, terminal-centric Linux experience based on NixOS. Experience the power of a purely functional operating system with modern terminal tools, all without the complexity of graphical desktop environments.
 
+**🔥 Ready to install?** Download `nixmywindows.v1.iso` - a single, self-contained bootable ISO that includes both the installer and complete system configuration. No internet required for installation!
+
 ## ✨ Features
 
 ### 🏗️ **NixOS Foundation**
@@ -75,23 +77,21 @@ This project creates a useable, user-friendly, terminal-centric Linux experience
 
 ### Installation
 
-1. **Download the latest ISO**
-   ```bash
-   # Download from releases
-   wget https://github.com/timlinux/nixmywindows/releases/latest/download/nixmywindows.iso
-   ```
+1. **Get the ISO**
+   - Download `nixmywindows.v1.iso` from releases, or
+   - Build locally: `./scripts/build-iso.sh`
 
 2. **Create bootable media**
    ```bash
    # Flash to USB drive (replace /dev/sdX with your USB device)
-   sudo dd if=nixmywindows.iso of=/dev/sdX bs=4M status=progress
+   sudo dd if=nixmywindows.v1.iso of=/dev/sdX bs=4M status=progress
    ```
 
-3. **Boot and install**
+3. **Install the system**
    - Boot from the USB drive
-   - Follow the installation prompts
-   - Configure ZFS encryption when prompted
-   - Reboot into your new system
+   - The ISO contains both the installer and complete nixmywindows configuration
+   - See [INSTALL.md](INSTALL.md) for detailed installation instructions
+   - Quick install: `sudo nixos-install --flake /iso/nixmywindows#laptop`
 
 ### Development Setup
 
@@ -120,12 +120,12 @@ nix run .#vm
 - [**CLA Agreement**](./.github/CLA.md) - Contributor License Agreement
 - [**Claude Configuration**](./.github/CLAUDE.md) - AI assistance directives and project context
 
-### Technical Documentation (Coming Soon)
-- [Installation Guide](./.github/docs/installation.md)
-- [Configuration Reference](./.github/docs/configuration.md)
-- [Terminal Tools Guide](./.github/docs/terminal-tools.md)
-- [ZFS Management](./.github/docs/zfs.md)
-- [Troubleshooting](./.github/docs/troubleshooting.md)
+### Technical Documentation
+- [**Installation Guide**](INSTALL.md) - Complete installation instructions
+- [Configuration Reference](./.github/docs/configuration.md) - (Coming Soon)
+- [Terminal Tools Guide](./.github/docs/terminal-tools.md) - (Coming Soon)
+- [ZFS Management](./.github/docs/zfs.md) - (Coming Soon)
+- [Troubleshooting](./.github/docs/troubleshooting.md) - (Coming Soon)
 
 ### Development Resources
 - [**Development Setup**](./.github/CONTRIBUTING.md#development-setup) - Quick start for developers

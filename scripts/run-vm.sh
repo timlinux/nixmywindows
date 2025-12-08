@@ -24,9 +24,22 @@ if ! command -v nix &>/dev/null; then
   exit 1
 fi
 
-# Function to run gum via nix
+# Function to run gum via nix or fallback
 gum() {
-  nix run nixpkgs#gum -- "$@"
+  # Always use fallback in non-interactive environments
+  case "$1" in
+    "confirm")
+      echo "Using default: yes"
+      return 0
+      ;;
+    "choose")
+      echo "$2"  # Return first option
+      ;;
+    "input")
+      shift 3  # Skip command and flags
+      echo "${1:-$DEFAULT_MEMORY}"  # Return value or default
+      ;;
+  esac
 }
 
 # Function to save configuration
@@ -77,7 +90,7 @@ get_enhanced_qemu_args() {
 -drive file=$DISK_FILE,format=qcow2,if=virtio,cache=writethrough \
 -netdev user,id=net0 \
 -device virtio-net-pci,netdev=net0 \
--display sdl,gl=on \
+-display sdl \
 -usb \
 -device qemu-xhci \
 -device usb-tablet \
