@@ -70,6 +70,7 @@
         # Shell and terminal tools
         shellcheck
         shfmt
+        gum
 
         # Documentation tools
         mdbook

@@ -1,229 +1,512 @@
 #!/usr/bin/env bash
-# nixmywindows Automated Installation Script
+# nixmywindows Interactive Installer
+# A comprehensive installer using gum for rich interactive UX
 
 set -euo pipefail
 
-# Colors for output
+# Colors and styling
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+NC='\033[0m'
 
-# Logging functions
-log_info() {
-  echo -e "${BLUE}[INFO]${NC} $1"
+# Global variables
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+HOSTNAME=""
+DISK=""
+HOST_ID=""
+ZFS_PASSPHRASE=""
+LOCALE="en_US.UTF-8"
+KEYMAP="us"
+SPACE_BOOT="5G"
+SPACE_NIX="250G"
+SPACE_HOME=""
+SPACE_VAR=""
+SPACE_ATUIN="50G"
+ZFS_POOL_NAME="NIXROOT"
+
+# Check dependencies
+check_dependencies() {
+    local missing_deps=()
+    
+    for dep in gum disko nixos-generate-config nixos-install; do
+        if ! command -v "$dep" >/dev/null 2>&1; then
+            missing_deps+=("$dep")
+        fi
+    done
+    
+    if [[ ${#missing_deps[@]} -gt 0 ]]; then
+        gum style --foreground="#ff0000" \
+            "Missing dependencies: ${missing_deps[*]}" \
+            "Please ensure you're running from the NixOS installer with this flake."
+        exit 1
+    fi
 }
 
-log_success() {
-  echo -e "${GREEN}[SUCCESS]${NC} $1"
-}
-
-log_warning() {
-  echo -e "${YELLOW}[WARNING]${NC} $1"
-}
-
-log_error() {
-  echo -e "${RED}[ERROR]${NC} $1"
-}
-
-# Check if running as root
+# Check root privileges
 check_root() {
-  if [[ $EUID -ne 0 ]]; then
-    log_error "This script must be run as root (use sudo)"
-    exit 1
-  fi
+    if [[ $EUID -ne 0 ]]; then
+        gum style --foreground="#ff0000" \
+            "This script must be run as root" \
+            "Use: sudo $0"
+        exit 1
+    fi
 }
 
-# Display disk selection
-select_disk() {
-  log_info "Available disks:"
-  echo ""
-
-  # Display available block devices with more details
-  echo "Device    Size    Type    Model"
-  echo "------    ----    ----    -----"
-  lsblk -d -n -o NAME,SIZE,TYPE,MODEL | while read name size type model; do
-    if [[ "$type" == "disk" ]]; then
-      echo "/dev/$name    $size    $type    $model"
-    fi
-  done
-
-  echo ""
-  read -p "Enter the target disk (e.g., /dev/vda, /dev/sda, /dev/nvme0n1): " target_disk
-
-  # Validate disk exists
-  if [[ ! -b "$target_disk" ]]; then
-    log_error "Disk $target_disk does not exist or is not a block device!"
-    log_info "Available block devices:"
-    ls -la /dev/sd* /dev/vd* /dev/nvme* 2>/dev/null | head -10 || true
-    exit 1
-  fi
-
-  # Check if disk is mounted
-  if mount | grep -q "^$target_disk"; then
-    log_warning "Disk $target_disk has mounted partitions!"
-    log_warning "This will destroy all data on $target_disk"
+# Welcome screen
+show_welcome() {
+    clear
+    gum style \
+        --foreground="#e95420" \
+        --border="rounded" \
+        --margin="1" \
+        --padding="1" \
+        "🍃 nixmywindows Interactive Installer" \
+        "" \
+        "This installer will guide you through setting up" \
+        "a complete NixOS system with ZFS encryption." \
+        "" \
+        "⚠️  WARNING: This will completely destroy all data" \
+        "    on the selected disk!"
+    
     echo ""
-    read -p "Are you absolutely sure you want to continue? (type 'yes' to confirm): " confirm
-    if [[ "$confirm" != "yes" ]]; then
-      log_info "Installation cancelled"
-      exit 0
+    if ! gum confirm "Do you want to continue?"; then
+        gum style --foreground="#ff0000" "Installation cancelled."
+        exit 0
     fi
-  fi
-
-  echo "$target_disk"
 }
 
-# Unmount any existing partitions on the target disk
-unmount_disk() {
-  local disk="$1"
-  log_info "Unmounting any existing partitions on $disk..."
-
-  # Find all partitions on this disk and unmount them
-  for partition in $(lsblk -nr -o NAME "$disk" | tail -n +2); do
-    partition_path="/dev/$partition"
-    if mount | grep -q "^$partition_path"; then
-      log_info "Unmounting $partition_path"
-      umount "$partition_path" || true
-    fi
-  done
-
-  # Also try to export any ZFS pools that might be using this disk
-  if command -v zpool >/dev/null 2>&1; then
-    log_info "Checking for ZFS pools on $disk..."
-    zpool export -a 2>/dev/null || true
-  fi
+# Generate unique ZFS host ID
+generate_host_id() {
+    # Generate 8-character hex string
+    printf "%08x" $((RANDOM * RANDOM))
 }
 
-# Run disko to partition and format the disk
+# Interpolate template variables
+interpolate_template() {
+    local template_file="$1"
+    local output_file="$2"
+    
+    # Read template and substitute variables
+    sed \
+        -e "s|{{DISK_DEVICE}}|$DISK|g" \
+        -e "s|{{HOSTNAME}}|$HOSTNAME|g" \
+        -e "s|{{SPACE_BOOT}}|$SPACE_BOOT|g" \
+        -e "s|{{SPACE_NIX}}|$SPACE_NIX|g" \
+        -e "s|{{SPACE_ATUIN}}|$SPACE_ATUIN|g" \
+        -e "s|{{ZFS_POOL_NAME}}|$ZFS_POOL_NAME|g" \
+        "$template_file" > "$output_file"
+}
+
+# Get list of available disks
+get_available_disks() {
+    # Get list of disks, excluding loop devices and small disks
+    lsblk -d -n -o NAME,SIZE,TYPE,MODEL | \
+        awk '$3 == "disk" && $2 !~ /^[0-9]+[MK]$/ {print "/dev/" $1 " (" $2 " - " $4 ")"}'
+}
+
+# Collect all user input upfront
+collect_user_input() {
+    gum style --foreground="#0066cc" "📝 System Configuration"
+    echo ""
+    
+    # Hostname
+    HOSTNAME=$(gum input --placeholder="Enter hostname (e.g., laptop, desktop, server)")
+    while [[ -z "$HOSTNAME" || ! "$HOSTNAME" =~ ^[a-zA-Z0-9-]+$ ]]; do
+        gum style --foreground="#ff0000" "Invalid hostname. Use only letters, numbers, and hyphens."
+        HOSTNAME=$(gum input --placeholder="Enter hostname (e.g., laptop, desktop, server)")
+    done
+    
+    # Disk selection
+    echo ""
+    gum style --foreground="#0066cc" "💾 Available Disks:"
+    
+    # Show disk information
+    gum style --border="rounded" --padding="1" \
+        "$(lsblk -d -o NAME,SIZE,TYPE,MODEL | head -1)" \
+        "$(lsblk -d -o NAME,SIZE,TYPE,MODEL | grep disk || echo 'No disks found')"
+    
+    # Get available disks for selection
+    mapfile -t disk_options < <(get_available_disks)
+    
+    if [[ ${#disk_options[@]} -eq 0 ]]; then
+        gum style --foreground="#ff0000" "No suitable disks found!"
+        exit 1
+    fi
+    
+    selected_disk=$(gum choose "${disk_options[@]}")
+    DISK=$(echo "$selected_disk" | awk '{print $1}')
+    
+    # Generate host ID
+    HOST_ID=$(generate_host_id)
+    gum style --foreground="#00cc00" "Generated ZFS Host ID: $HOST_ID"
+    
+    # Get disk size for space calculations
+    local disk_size_gb
+    disk_size_gb=$(lsblk -d -n -o SIZE "$DISK" | sed 's/G//' | sed 's/T/*1024/' | bc 2>/dev/null || echo "500")
+    
+    # Extract numeric values from space variables
+    local boot_gb=$(echo "$SPACE_BOOT" | sed 's/G//')
+    local atuin_gb=$(echo "$SPACE_ATUIN" | sed 's/G//')
+    
+    local available_space=$((disk_size_gb - boot_gb - atuin_gb))  # Subtract boot and atuin space
+    
+    # Space allocation
+    echo ""
+    gum style --foreground="#0066cc" "📊 Disk Space Allocation"
+    
+    # /nix partition
+    SPACE_NIX=$(gum input \
+        --placeholder="$SPACE_NIX" \
+        --prompt="/nix space (default ${SPACE_NIX}): " \
+        --value="$SPACE_NIX")
+    
+    # Calculate remaining space
+    local nix_gb
+    nix_gb=$(echo "$SPACE_NIX" | sed 's/G//')
+    local remaining=$((available_space - nix_gb))
+    
+    # /var/atuin is fixed at 50G, so just inform
+    gum style --foreground="#666666" "/var/atuin: $SPACE_ATUIN (fixed)"
+    
+    # /home gets the rest
+    SPACE_HOME="${remaining}G"
+    gum style --foreground="#666666" "/home: $SPACE_HOME (remaining space)"
+    
+    # Locale and keyboard
+    echo ""
+    gum style --foreground="#0066cc" "🌍 Localization"
+    
+    # Locale selection
+    local locale_options=(
+        "en_US.UTF-8"
+        "en_GB.UTF-8" 
+        "de_DE.UTF-8"
+        "fr_FR.UTF-8"
+        "es_ES.UTF-8"
+        "other"
+    )
+    
+    selected_locale=$(gum choose --header="Select locale:" "${locale_options[@]}")
+    if [[ "$selected_locale" == "other" ]]; then
+        LOCALE=$(gum input --placeholder="en_US.UTF-8" --prompt="Enter locale: ")
+    else
+        LOCALE="$selected_locale"
+    fi
+    
+    # Keyboard layout
+    local keymap_options=(
+        "us"
+        "uk" 
+        "de"
+        "fr"
+        "es"
+        "other"
+    )
+    
+    selected_keymap=$(gum choose --header="Select keyboard layout:" "${keymap_options[@]}")
+    if [[ "$selected_keymap" == "other" ]]; then
+        KEYMAP=$(gum input --placeholder="us" --prompt="Enter keymap: ")
+    else
+        KEYMAP="$selected_keymap"
+    fi
+    
+    # ZFS encryption passphrase
+    echo ""
+    gum style --foreground="#0066cc" "🔐 ZFS Encryption"
+    ZFS_PASSPHRASE=$(gum input --password --placeholder="Enter ZFS encryption passphrase")
+    while [[ ${#ZFS_PASSPHRASE} -lt 8 ]]; do
+        gum style --foreground="#ff0000" "Passphrase must be at least 8 characters"
+        ZFS_PASSPHRASE=$(gum input --password --placeholder="Enter ZFS encryption passphrase")
+    done
+    
+    local confirm_passphrase
+    confirm_passphrase=$(gum input --password --placeholder="Confirm ZFS encryption passphrase")
+    while [[ "$ZFS_PASSPHRASE" != "$confirm_passphrase" ]]; do
+        gum style --foreground="#ff0000" "Passphrases do not match"
+        confirm_passphrase=$(gum input --password --placeholder="Confirm ZFS encryption passphrase")
+    done
+}
+
+# Show configuration summary
+show_summary() {
+    echo ""
+    gum style --foreground="#0066cc" "📋 Configuration Summary"
+    
+    gum style \
+        --border="rounded" \
+        --padding="1" \
+        --margin="1" \
+        "Hostname: $HOSTNAME" \
+        "Disk: $DISK" \
+        "ZFS Host ID: $HOST_ID" \
+        "Locale: $LOCALE" \
+        "Keyboard: $KEYMAP" \
+        "" \
+        "Space allocation:" \
+        "  /boot: $SPACE_BOOT (EFI)" \
+        "  /nix: $SPACE_NIX" \
+        "  /home: $SPACE_HOME" \
+        "  /var/atuin: $SPACE_ATUIN (XFS on ZFS volume)" \
+        "" \
+        "🔥 THIS WILL DESTROY ALL DATA ON $DISK"
+    
+    echo ""
+    if ! gum confirm "Proceed with installation?"; then
+        gum style --foreground="#ff0000" "Installation cancelled."
+        exit 0
+    fi
+    
+    echo ""
+    gum style --foreground="#ff0000" "FINAL WARNING!"
+    local confirmation
+    confirmation=$(gum input --placeholder="Type 'DESTROY' to confirm")
+    if [[ "$confirmation" != "DESTROY" ]]; then
+        gum style --foreground="#ff0000" "Installation cancelled."
+        exit 0
+    fi
+}
+
+# Generate host configuration
+generate_host_config() {
+    local host_dir="$PROJECT_ROOT/hosts/$HOSTNAME"
+    
+    gum style --foreground="#0066cc" "📁 Generating host configuration in $host_dir"
+    
+    mkdir -p "$host_dir"
+    
+    # Generate default.nix
+    cat > "$host_dir/default.nix" <<EOF
+{ config, lib, pkgs, inputs, hostname, ... }:
+
+{
+  imports = [
+    ./disks.nix
+    ./hardware.nix
+    ../../users/user.nix
+    ../../users/admin.nix
+  ];
+
+  networking.hostName = hostname;
+  system.stateVersion = "24.05";
+  
+  # Locale configuration
+  i18n.defaultLocale = "$LOCALE";
+  
+  # Keyboard configuration
+  services.xserver.xkb.layout = "$KEYMAP";
+  console.keyMap = "$KEYMAP";
+}
+EOF
+
+    # Generate disks.nix from template
+    local template_file="$PROJECT_ROOT/templates/disko-template.nix"
+    
+    if [[ ! -f "$template_file" ]]; then
+        gum style --foreground="#ff0000" "❌ Disko template not found: $template_file"
+        exit 1
+    fi
+    
+    interpolate_template "$template_file" "$host_dir/disks.nix"
+
+    # Generate initial hardware.nix (will be updated by nixos-generate-config)
+    cat > "$host_dir/hardware.nix" <<EOF
+# Auto-generated hardware configuration for $HOSTNAME
+{ config, lib, pkgs, modulesPath, ... }:
+
+{
+  networking.hostId = "$HOST_ID";
+  imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
+
+  # Hardware configuration will be updated by nixos-generate-config
+  boot = {
+    initrd = {
+      availableKernelModules = [ "xhci_pci" "nvme" "usb_storage" "sd_mod" ];
+      kernelModules = [ ];
+    };
+    kernelModules = [ "kvm-intel" ];
+    extraModulePackages = [ ];
+  };
+
+  hardware = {
+    enableAllFirmware = true;
+    cpu.intel.updateMicrocode = lib.mkDefault true;
+  };
+
+  powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
+}
+EOF
+
+    gum style --foreground="#00cc00" "✅ Host configuration generated"
+}
+
+# Format disk with disko
 format_disk() {
-  local disk="$1"
-  log_info "Partitioning and formatting $disk with ZFS..."
-
-  # Create a temporary disko config with the correct device
-  local temp_config="/tmp/disko-config.nix"
-
-  log_info "Creating temporary disko config for device: $disk"
-
-  # Use awk instead of sed to avoid delimiter issues
-  awk -v new_device="$disk" '{
-        if ($0 ~ /d0 = "\/dev\/nvme0n1";/) {
-            sub(/\/dev\/nvme0n1/, new_device)
-        }
-        print
-    }' /iso/nixmywindows/hosts/laptop/disks.nix >"$temp_config"
-
-  log_info "Running disko to format $disk..."
-  log_info "Using config: $temp_config"
-
-  # Show the modified config for debugging
-  log_info "Modified device variable:"
-  grep "d0.*=" "$temp_config" || log_warning "Could not find device variable"
-
-  if [[ ! -f "$temp_config" ]]; then
-    log_error "Failed to create temporary config file"
-    exit 1
-  fi
-
-  disko --mode disko "$temp_config"
-
-  log_success "Disk formatting completed"
+    local host_dir="$PROJECT_ROOT/hosts/$HOSTNAME"
+    local disko_config="$host_dir/disks.nix"
+    
+    gum style --foreground="#0066cc" "💾 Formatting disk $DISK with ZFS"
+    
+    # Unmount any existing partitions
+    gum style --foreground="#ffaa00" "Unmounting existing partitions..."
+    for partition in $(lsblk -nr -o NAME "$DISK" | tail -n +2 2>/dev/null || true); do
+        partition_path="/dev/$partition"
+        if mount | grep -q "^$partition_path"; then
+            umount "$partition_path" 2>/dev/null || true
+        fi
+    done
+    
+    # Export any existing ZFS pools
+    if command -v zpool >/dev/null 2>&1; then
+        zpool export -a 2>/dev/null || true
+    fi
+    
+    # Run disko
+    gum style --foreground="#ffaa00" "Running disko (this may take a few minutes)..."
+    
+    # Set up ZFS passphrase for disko
+    export DISK_ENCRYPTION_PASSPHRASE="$ZFS_PASSPHRASE"
+    
+    if ! disko --mode disko "$disko_config"; then
+        gum style --foreground="#ff0000" "❌ Disk formatting failed!"
+        exit 1
+    fi
+    
+    gum style --foreground="#00cc00" "✅ Disk formatting completed"
 }
 
-# Install the system
-install_system() {
-  log_info "Installing nixmywindows system..."
+# Generate hardware configuration
+generate_hardware_config() {
+    local host_dir="$PROJECT_ROOT/hosts/$HOSTNAME"
+    
+    gum style --foreground="#0066cc" "🔧 Generating hardware configuration"
+    
+    # Generate hardware configuration
+    nixos-generate-config --root /mnt --dir /tmp/nixos-config
+    
+    # Merge the generated hardware with our template, preserving hostId
+    if [[ -f "/tmp/nixos-config/hardware-configuration.nix" ]]; then
+        # Extract hardware-specific parts and merge with our template
+        cat > "$host_dir/hardware.nix" <<EOF
+# Hardware configuration for $HOSTNAME
+{ config, lib, pkgs, modulesPath, ... }:
 
-  # Set a reasonable timeout for the installation
-  export NIX_CONFIG="
+{
+  networking.hostId = "$HOST_ID";
+  imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
+
+$(sed -n '/boot\./,/};/p' /tmp/nixos-config/hardware-configuration.nix | sed 's/^/  /')
+
+$(sed -n '/hardware\./,/};/p' /tmp/nixos-config/hardware-configuration.nix | sed 's/^/  /' || echo '  hardware = {
+    enableAllFirmware = true;
+    cpu.intel.updateMicrocode = lib.mkDefault true;
+  };')
+
+$(sed -n '/powerManagement\./p' /tmp/nixos-config/hardware-configuration.nix | sed 's/^/  /' || echo '  powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";')
+}
+EOF
+    fi
+    
+    gum style --foreground="#00cc00" "✅ Hardware configuration generated"
+}
+
+# Install NixOS
+install_nixos() {
+    gum style --foreground="#0066cc" "🚀 Installing NixOS (this will take a while)"
+    
+    # Set up Nix configuration for better performance
+    export NIX_CONFIG="
         extra-substituters = https://cache.nixos.org/
         extra-trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
         max-jobs = auto
         cores = 0
+        keep-outputs = true
+        keep-derivations = true
     "
-
-  log_info "Starting nixos-install (this may take a while)..."
-  nixos-install --flake /iso/nixmywindows#laptop --no-root-passwd
-
-  log_success "System installation completed"
+    
+    # Run installation
+    if ! nixos-install --flake "$PROJECT_ROOT#$HOSTNAME" --no-root-passwd; then
+        gum style --foreground="#ff0000" "❌ NixOS installation failed!"
+        exit 1
+    fi
+    
+    gum style --foreground="#00cc00" "✅ NixOS installation completed"
 }
 
-# Set up root password
+# Copy flake to new system
+copy_flake() {
+    gum style --foreground="#0066cc" "📦 Copying flake to new system"
+    
+    local target_dir="/mnt/etc/nixmywindows"
+    mkdir -p "$target_dir"
+    
+    # Copy entire flake including the new host config
+    cp -r "$PROJECT_ROOT"/* "$target_dir/"
+    
+    # Set proper ownership
+    chown -R root:root "$target_dir"
+    
+    gum style --foreground="#00cc00" "✅ Flake copied to new system"
+}
+
+# Setup root password
 setup_root_password() {
-  log_info "Setting up root password..."
-
-  # Chroot into the new system to set password
-  nixos-enter --root /mnt --command "passwd root"
-
-  log_success "Root password configured"
+    gum style --foreground="#0066cc" "🔑 Setting up root password"
+    
+    nixos-enter --root /mnt --command "passwd root"
+    
+    gum style --foreground="#00cc00" "✅ Root password configured"
 }
 
-# Post-installation cleanup
-cleanup() {
-  log_info "Cleaning up..."
-
-  # Clean up temporary files
-  rm -f /tmp/disko-config.nix
-
-  log_success "Cleanup completed"
+# Completion and reboot
+complete_installation() {
+    gum style \
+        --foreground="#00cc00" \
+        --border="rounded" \
+        --padding="1" \
+        --margin="1" \
+        "🎉 Installation Complete!" \
+        "" \
+        "Your nixmywindows system '$HOSTNAME' is ready!" \
+        "The complete flake has been copied to /etc/nixmywindows" \
+        "" \
+        "You can now remove the installation media."
+    
+    echo ""
+    if gum confirm "Reboot now?"; then
+        gum style --foreground="#0066cc" "Rebooting..."
+        reboot
+    else
+        gum style --foreground="#0066cc" "Remember to reboot when ready!"
+    fi
 }
 
 # Main installation function
 main() {
-  echo "========================================"
-  echo "     nixmywindows Auto-Installer"
-  echo "========================================"
-  echo ""
-
-  log_warning "This script will completely wipe the selected disk!"
-  log_warning "Make sure you have backed up all important data."
-  echo ""
-
-  check_root
-
-  # Select target disk
-  target_disk=$(select_disk)
-  log_info "Target disk: $target_disk"
-  echo ""
-
-  # Final confirmation
-  log_warning "FINAL WARNING: This will DESTROY ALL DATA on $target_disk"
-  read -p "Type 'DESTROY' to confirm: " final_confirm
-  if [[ "$final_confirm" != "DESTROY" ]]; then
-    log_info "Installation cancelled"
-    exit 0
-  fi
-
-  echo ""
-  log_info "Starting installation process..."
-
-  # Installation steps
-  unmount_disk "$target_disk"
-  format_disk "$target_disk"
-  install_system
-  setup_root_password
-  cleanup
-
-  echo ""
-  log_success "========================================="
-  log_success "  nixmywindows installation completed!"
-  log_success "========================================="
-  echo ""
-  log_info "You can now remove the installation media and reboot."
-  log_info "Your new nixmywindows system is ready!"
-  echo ""
-
-  read -p "Reboot now? (y/N): " reboot_confirm
-  if [[ "$reboot_confirm" =~ ^[Yy]$ ]]; then
-    log_info "Rebooting..."
-    reboot
-  fi
+    check_dependencies
+    check_root
+    
+    show_welcome
+    collect_user_input
+    show_summary
+    
+    # Installation phases with progress tracking
+    generate_host_config
+    format_disk
+    generate_hardware_config
+    install_nixos
+    copy_flake
+    setup_root_password
+    
+    complete_installation
 }
 
 # Trap to cleanup on exit
-trap cleanup EXIT
+trap 'gum style --foreground="#ff0000" "Installation interrupted!"' INT TERM
 
 # Run main function
 main "$@"
-

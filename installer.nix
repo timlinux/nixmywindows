@@ -18,6 +18,18 @@
       source = ./scripts/install.sh;
       target = "/install.sh";
     }
+    {
+      source = ./scripts/disko-vda.nix;
+      target = "/nixmywindows/scripts/disko-vda.nix";
+    }
+    {
+      source = ./scripts/disko-sda.nix;
+      target = "/nixmywindows/scripts/disko-sda.nix";
+    }
+    {
+      source = ./scripts/disko-nvme.nix;
+      target = "/nixmywindows/scripts/disko-nvme.nix";
+    }
   ];
 
   # Basic packages for installation
