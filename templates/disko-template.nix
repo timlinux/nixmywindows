@@ -43,7 +43,7 @@ in {
     zpool = {
       "{{ZFS_POOL_NAME}}" = {
         type = "zpool";
-        mode = "single";
+        mode = "";
         options = {
           ashift = "12";
           autotrim = "on";
