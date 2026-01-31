@@ -10,14 +10,15 @@
         device = "nodev";
         efiInstallAsRemovable = true;
         efiSupport = true;
+        zfsSupport = true;
         useOSProber = true;
         configurationLimit = 10;
       };
       timeout = 5;
     };
 
-    # Kernel configuration
-    kernelPackages = lib.mkDefault pkgs.linuxPackages_6_6;
+    # Kernel configuration - use latest ZFS-compatible kernel
+    kernelPackages = config.boot.zfs.package.latestCompatibleLinuxPackages;
 
     # Clean /tmp on boot
     tmp.cleanOnBoot = true;
@@ -37,6 +38,9 @@
       "usb_storage"
       "rtsx_pci_sdmmc"
       "sdhci_pci"
+      "virtio_pci"
+      "virtio_blk"
+      "virtio_scsi"
     ];
 
     # Settings from https://github.com/NixOS/nixos-hardware/blob/master/framework/16-inch/common/amd.nix

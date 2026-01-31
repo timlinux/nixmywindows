@@ -23,7 +23,7 @@ with lib;
     boot.supportedFilesystems = [ "zfs" ];
     boot.zfs = {
       requestEncryptionCredentials = config.nixmywindows.zfs.encryption;
-      forceImportRoot = false;
+      forceImportRoot = true;
     };
     
     # ZFS services

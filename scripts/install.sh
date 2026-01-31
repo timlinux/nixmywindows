@@ -306,16 +306,15 @@ generate_host_config() {
   imports = [
     ./disks.nix
     ./hardware.nix
-    ../../modules/system
-    ../../users/user.nix
-    ../../users/admin.nix
   ];
 
   networking.hostName = hostname;
-  system.stateVersion = "24.05";
-  
-  # Boot configuration for ZFS - will be overridden by hardware.nix
-  
+  system.stateVersion = "25.11";
+
+  # Enable ZFS support
+  nixmywindows.zfs.enable = true;
+  nixmywindows.zfs.encryption = true;
+
   # Locale configuration
   i18n.defaultLocale = "$LOCALE";
   
@@ -377,6 +376,12 @@ format_disk() {
 
   gum style --foreground="#0066cc" "💾 Formatting disk $DISK with ZFS"
 
+  # Set the hostId on the live system BEFORE creating the ZFS pool
+  # so the pool is stamped with the same hostId the installed system will use.
+  # On NixOS live ISOs, /etc/hostid may be a symlink into the read-only nix store.
+  rm -f /etc/hostid 2>/dev/null || true
+  zgenhostid "$HOST_ID"
+
   # Unmount any existing partitions
   gum style --foreground="#ffaa00" "Unmounting existing partitions..."
   for partition in $(lsblk -nr -o NAME "$DISK" | tail -n +2 2>/dev/null || true); do
@@ -429,35 +434,15 @@ generate_hardware_config() {
     supportedFilesystems = [ "zfs" ];
     zfs = {
       requestEncryptionCredentials = true;
-      forceImportRoot = false;
-      forceImportAll = false;
-      # Ensure ZFS pools are available early
-      extraPools = [ "$ZFS_POOL_NAME" ];
-    };
-    loader = {
-      grub = {
-        enable = true;
-        efiSupport = true;
-        efiInstallAsRemovable = true;
-        device = "nodev";
-        # Use the ZFS root dataset
-        zfsSupport = true;
-      };
+      forceImportRoot = true;
     };
     initrd = {
-      availableKernelModules = [ 
-        "ahci" "xhci_pci" "virtio_pci" "virtio_scsi" 
-        "sd_mod" "sr_mod" "nvme" "ehci_pci" "usbhid" 
-        "usb_storage" "sdhci_pci" 
+      availableKernelModules = [
+        "ahci" "xhci_pci" "virtio_pci" "virtio_blk" "virtio_scsi"
+        "sd_mod" "sr_mod" "nvme" "ehci_pci" "usbhid"
+        "usb_storage" "sdhci_pci"
       ];
-      # ZFS needs to be available in initrd
-      kernelModules = [ "zfs" ];
-      # Import ZFS pool during boot
-      postDeviceCommands = lib.mkAfter ''
-        echo "Importing ZFS pool $ZFS_POOL_NAME..."
-        zpool import -f $ZFS_POOL_NAME || true
-        echo "ZFS pool import complete."
-      '';
+      kernelModules = [ ];
     };
     kernelModules = [ "kvm-intel" "kvm-amd" ];
     extraModulePackages = [ ];
@@ -502,7 +487,7 @@ install_nixos() {
   gum style --foreground="#00cc00" "✅ NixOS installation completed"
 }
 
-# Configure ZFS bootfs property and install GRUB
+# Configure ZFS bootfs property
 configure_zfs_boot() {
   gum style --foreground="#0066cc" "🔧 Configuring ZFS boot properties"
 
@@ -519,17 +504,19 @@ configure_zfs_boot() {
     exit 1
   fi
 
-  # Ensure the root dataset is mounted at the correct location
-  zfs set mountpoint=/ "$ZFS_POOL_NAME/root"
-
-  # Manually install GRUB to ensure proper ZFS support
-  gum style --foreground="#0066cc" "Installing GRUB with ZFS support..."
-  nixos-enter --root /mnt --command "grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=NixOS --removable"
-
-  # Generate GRUB configuration
-  nixos-enter --root /mnt --command "nixos-rebuild boot"
-
   gum style --foreground="#00cc00" "✅ ZFS boot configuration completed"
+}
+
+# Finalize ZFS pool - export and re-import to stamp correct hostId
+finalize_zfs_pool() {
+  gum style --foreground="#0066cc" "🔧 Finalizing ZFS pool (export/re-import for hostId)..."
+
+  umount -R /mnt 2>/dev/null || true
+  zpool export "$ZFS_POOL_NAME"
+  zpool import -f "$ZFS_POOL_NAME"
+  zpool export "$ZFS_POOL_NAME"
+
+  gum style --foreground="#00cc00" "✅ ZFS pool finalized and exported cleanly"
 }
 
 # Copy flake to new system
@@ -618,6 +605,7 @@ main() {
   copy_flake
   copy_flake_to_user
   setup_root_password
+  finalize_zfs_pool
 
   complete_installation
 }

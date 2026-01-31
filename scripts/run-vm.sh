@@ -16,6 +16,7 @@ ISO_FILE="nixmywindows.v1.iso"
 CONFIG_DIR="$HOME/.config/nixmywindows"
 MEMORY_CONFIG="$CONFIG_DIR/memory"
 DISK_CONFIG="$CONFIG_DIR/disk_size"
+OVMF_VARS_FILE="$CONFIG_DIR/OVMF_VARS.fd"
 
 # Check if nix is available for gum
 if ! command -v nix &>/dev/null; then
@@ -88,9 +89,9 @@ clean_vm() {
   fi
   
   if [ -d "$CONFIG_DIR" ]; then
-    if gum confirm "Remove configuration cache?"; then
+    if gum confirm "Remove configuration cache (includes UEFI variables)?"; then
       rm -rf "$CONFIG_DIR"
-      echo "✓ Removed configuration cache"
+      echo "✓ Removed configuration cache and UEFI variables"
     fi
   fi
   
@@ -152,6 +153,49 @@ inspect_disk() {
 }
 
 
+# Locate OVMF UEFI firmware (required for EFI boot)
+find_ovmf() {
+  local ovmf_code=""
+  # Common OVMF locations across distros and nix
+  for candidate in \
+    "/run/libvirt/nix-ovmf/OVMF_CODE.fd" \
+    "/usr/share/OVMF/OVMF_CODE.fd" \
+    "/usr/share/edk2/ovmf/OVMF_CODE.fd" \
+    "/usr/share/edk2-ovmf/x64/OVMF_CODE.fd" \
+    "/usr/share/qemu/OVMF_CODE.fd"; do
+    if [ -f "$candidate" ]; then
+      ovmf_code="$candidate"
+      break
+    fi
+  done
+
+  # Try nix store lookup if not found
+  if [ -z "$ovmf_code" ]; then
+    ovmf_code=$(nix build --print-out-paths --no-link nixpkgs#OVMF.fd 2>/dev/null)/FV/OVMF_CODE.fd || true
+  fi
+
+  if [ -z "$ovmf_code" ] || [ ! -f "$ovmf_code" ]; then
+    echo "Error: OVMF UEFI firmware not found."
+    echo "Install it with: nix-env -iA nixpkgs.OVMF"
+    echo "Or on your distro: apt install ovmf / dnf install edk2-ovmf"
+    exit 1
+  fi
+
+  OVMF_CODE="$ovmf_code"
+
+  # Create a writable copy of OVMF_VARS for this VM (stores EFI variables)
+  if [ ! -f "$OVMF_VARS_FILE" ]; then
+    local ovmf_vars_src="${ovmf_code%OVMF_CODE.fd}OVMF_VARS.fd"
+    if [ -f "$ovmf_vars_src" ]; then
+      mkdir -p "$CONFIG_DIR"
+      cp "$ovmf_vars_src" "$OVMF_VARS_FILE"
+    else
+      echo "Error: OVMF_VARS.fd not found alongside OVMF_CODE.fd"
+      exit 1
+    fi
+  fi
+}
+
 # Check if qemu-system-x86_64 is available
 if ! command -v qemu-system-x86_64 &>/dev/null; then
   echo "Error: qemu-system-x86_64 is not installed"
@@ -165,6 +209,10 @@ if [ ! -f "$ISO_FILE" ]; then
   echo "You may need to build the ISO first using: ./build-iso.sh"
   exit 1
 fi
+
+# Locate UEFI firmware (required for EFI boot)
+find_ovmf
+echo "Using UEFI firmware: $OVMF_CODE"
 
 # Handle help command
 if [ "$1" = "help" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
@@ -262,8 +310,13 @@ fi
 
 # Get base QEMU arguments (without drive, we'll add that separately)
 get_base_qemu_args() {
+  # UEFI firmware (required for EFI boot)
+  local uefi_args="-drive if=pflash,format=raw,readonly=on,file=$OVMF_CODE \
+-drive if=pflash,format=raw,file=$OVMF_VARS_FILE"
+
   if [ "$ENABLE_ENHANCED_VIRTUALIZATION" = "true" ]; then
-    echo "-cpu host,+x2apic,+tsc-deadline,+hypervisor,+tsc_adjust,+umip,+md-clear,+stibp,+arch-capabilities,+ssbd,+xsaves \
+    echo "$uefi_args \
+-cpu host,+x2apic,+tsc-deadline,+hypervisor,+tsc_adjust,+umip,+md-clear,+stibp,+arch-capabilities,+ssbd,+xsaves \
 -machine q35,accel=kvm,kernel_irqchip=on \
 -smp 4,cores=2,threads=2 \
 -netdev user,id=net0 \
@@ -275,7 +328,8 @@ get_base_qemu_args() {
 -rtc base=localtime \
 -global kvm-pit.lost_tick_policy=delay"
   else
-    echo "-cpu host \
+    echo "$uefi_args \
+-cpu host \
 -smp 4 \
 -netdev user,id=net0 \
 -device virtio-net-pci,netdev=net0 \
@@ -298,7 +352,7 @@ case "$BOOT_MODE" in
     -enable-kvm \
     -m "$MEMORY" \
     $BASE_QEMU_ARGS \
-    -drive file="$DISK_FILE",format=qcow2,if=virtio,cache=writethrough \
+    -drive file="$DISK_FILE",format=qcow2,if=virtio,cache=writethrough,serial=nixmywindows-root \
     -cdrom "$ISO_FILE" \
     -boot order=dc,menu=on \
     -name "NixMyWindows (ISO Boot)"
@@ -356,9 +410,11 @@ case "$BOOT_MODE" in
       qemu-system-x86_64 \
         -enable-kvm \
         -m "$MEMORY" \
+        -drive if=pflash,format=raw,readonly=on,file="$OVMF_CODE" \
+        -drive if=pflash,format=raw,file="$OVMF_VARS_FILE" \
         -cpu host \
         -smp 2 \
-        -drive file="$DISK_FILE",format=qcow2,if=virtio \
+        -drive file="$DISK_FILE",format=qcow2,if=virtio,serial=nixmywindows-root \
         -netdev user,id=net0 \
         -device e1000,netdev=net0 \
         -display sdl \
@@ -370,7 +426,7 @@ case "$BOOT_MODE" in
         -enable-kvm \
         -m "$MEMORY" \
         $BASE_QEMU_ARGS \
-        -drive file="$DISK_FILE",format=qcow2,if=virtio,cache=writethrough \
+        -drive file="$DISK_FILE",format=qcow2,if=virtio,cache=writethrough,serial=nixmywindows-root \
         -boot order=c,menu=on \
         -name "NixMyWindows" \
         -serial stdio \
