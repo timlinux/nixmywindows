@@ -306,6 +306,8 @@ generate_host_config() {
   imports = [
     ./disks.nix
     ./hardware.nix
+    ../../users/user.nix
+    ../../users/admin.nix
   ];
 
   networking.hostName = hostname;
