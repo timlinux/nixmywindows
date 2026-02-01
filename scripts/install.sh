@@ -22,14 +22,14 @@ ZFS_POOL_NAME="NIXROOT"
 check_dependencies() {
   local missing_deps=()
 
-  for dep in gum disko nixos-generate-config nixos-install; do
+  for dep in gum disko nixos-generate-config nixos-install git; do
     if ! command -v "$dep" >/dev/null 2>&1; then
       missing_deps+=("$dep")
     fi
   done
 
   if [[ ${#missing_deps[@]} -gt 0 ]]; then
-    gum style --foreground="#ff0000" \
+    gum style --foreground="#DC3545" \
       "Missing dependencies: ${missing_deps[*]}" \
       "Please ensure you're running from the NixOS installer with this flake."
     exit 1
@@ -39,7 +39,7 @@ check_dependencies() {
 # Check root privileges
 check_root() {
   if [[ $EUID -ne 0 ]]; then
-    gum style --foreground="#ff0000" \
+    gum style --foreground="#DC3545" \
       "This script must be run as root" \
       "Use: sudo $0"
     exit 1
@@ -51,7 +51,7 @@ show_build_info() {
   if [[ -f "/iso/tuinix/build-info.txt" ]]; then
     echo ""
     gum style \
-      --foreground="#00cc00" \
+      --foreground="#28A745" \
       --border="rounded" \
       --padding="1" \
       --margin="1" \
@@ -82,7 +82,7 @@ show_welcome() {
 
   echo ""
   if ! gum confirm "Do you want to continue?"; then
-    gum style --foreground="#ff0000" "Installation cancelled."
+    gum style --foreground="#DC3545" "Installation cancelled."
     exit 0
   fi
 }
@@ -118,19 +118,19 @@ get_available_disks() {
 
 # Collect all user input upfront
 collect_user_input() {
-  gum style --foreground="#0066cc" "📝 System Configuration"
+  gum style --foreground="#5277C3" "📝 System Configuration"
   echo ""
 
   # Hostname
   HOSTNAME=$(gum input --placeholder="Enter hostname (e.g., laptop, desktop, server)")
   while [[ -z "$HOSTNAME" || ! "$HOSTNAME" =~ ^[a-zA-Z0-9-]+$ ]]; do
-    gum style --foreground="#ff0000" "Invalid hostname. Use only letters, numbers, and hyphens."
+    gum style --foreground="#DC3545" "Invalid hostname. Use only letters, numbers, and hyphens."
     HOSTNAME=$(gum input --placeholder="Enter hostname (e.g., laptop, desktop, server)")
   done
 
   # Disk selection
   echo ""
-  gum style --foreground="#0066cc" "💾 Available Disks:"
+  gum style --foreground="#5277C3" "💾 Available Disks:"
 
   # Show disk information
   gum style --border="rounded" --padding="1" \
@@ -141,7 +141,7 @@ collect_user_input() {
   mapfile -t disk_options < <(get_available_disks)
 
   if [[ ${#disk_options[@]} -eq 0 ]]; then
-    gum style --foreground="#ff0000" "No suitable disks found!"
+    gum style --foreground="#DC3545" "No suitable disks found!"
     exit 1
   fi
 
@@ -150,17 +150,17 @@ collect_user_input() {
 
   # Generate host ID
   HOST_ID=$(generate_host_id)
-  gum style --foreground="#00cc00" "Generated ZFS Host ID: $HOST_ID"
+  gum style --foreground="#28A745" "Generated ZFS Host ID: $HOST_ID"
 
   # Get disk size for space calculations
   echo ""
-  gum style --foreground="#0066cc" "📊 Calculating Disk Space Allocation"
+  gum style --foreground="#5277C3" "📊 Calculating Disk Space Allocation"
 
   local disk_size_bytes
   disk_size_bytes=$(lsblk -d -n -b -o SIZE "$DISK")
   local disk_size_gb=$((disk_size_bytes / 1024 / 1024 / 1024))
 
-  gum style --foreground="#00cc00" "Disk size: ${disk_size_gb}GB"
+  gum style --foreground="#28A745" "Disk size: ${disk_size_gb}GB"
 
   # Calculate space allocation based on percentages
   local boot_gb=5                              # Fixed 5GB for boot
@@ -184,7 +184,7 @@ collect_user_input() {
   SPACE_ATUIN="${atuin_gb}G"
   SPACE_HOME="${home_gb}G"
 
-  gum style --foreground="#666666" \
+  gum style --foreground="#654321" \
     "Automatic space allocation:" \
     "  /boot: $SPACE_BOOT (fixed)" \
     "  /nix: $SPACE_NIX (5% of disk)" \
@@ -193,7 +193,7 @@ collect_user_input() {
 
   # Locale and keyboard
   echo ""
-  gum style --foreground="#0066cc" "🌍 Localization"
+  gum style --foreground="#5277C3" "🌍 Localization"
 
   # Locale selection
   local locale_options=(
@@ -234,7 +234,7 @@ collect_user_input() {
 # Show configuration summary
 show_summary() {
   echo ""
-  gum style --foreground="#0066cc" "📋 Configuration Summary"
+  gum style --foreground="#5277C3" "📋 Configuration Summary"
 
   gum style \
     --border="rounded" \
@@ -256,16 +256,16 @@ show_summary() {
 
   echo ""
   if ! gum confirm "Proceed with installation?"; then
-    gum style --foreground="#ff0000" "Installation cancelled."
+    gum style --foreground="#DC3545" "Installation cancelled."
     exit 0
   fi
 
   echo ""
-  gum style --foreground="#ff0000" "FINAL WARNING!"
+  gum style --foreground="#DC3545" "FINAL WARNING!"
   local confirmation
   confirmation=$(gum input --placeholder="Type 'DESTROY' to confirm")
   if [[ "$confirmation" != "DESTROY" ]]; then
-    gum style --foreground="#ff0000" "Installation cancelled."
+    gum style --foreground="#DC3545" "Installation cancelled."
     exit 0
   fi
 }
@@ -274,7 +274,7 @@ show_summary() {
 generate_host_config() {
   # Copy flake to writable location first
   local work_dir="/tmp/tuinix-install"
-  gum style --foreground="#0066cc" "📁 Copying flake to writable location: $work_dir"
+  gum style --foreground="#5277C3" "📁 Copying flake to writable location: $work_dir"
 
   rm -rf "$work_dir"
   cp -r "$PROJECT_ROOT" "$work_dir"
@@ -284,7 +284,7 @@ generate_host_config() {
 
   local host_dir="$PROJECT_ROOT/hosts/$HOSTNAME"
 
-  gum style --foreground="#0066cc" "📁 Generating host configuration in $host_dir"
+  gum style --foreground="#5277C3" "📁 Generating host configuration in $host_dir"
 
   mkdir -p "$host_dir"
 
@@ -320,7 +320,7 @@ EOF
   local template_file="$PROJECT_ROOT/templates/disko-template.nix"
 
   if [[ ! -f "$template_file" ]]; then
-    gum style --foreground="#ff0000" "❌ Disko template not found: $template_file"
+    gum style --foreground="#DC3545" "❌ Disko template not found: $template_file"
     exit 1
   fi
 
@@ -358,7 +358,7 @@ EOF
 }
 EOF
 
-  gum style --foreground="#00cc00" "✅ Host configuration generated"
+  gum style --foreground="#28A745" "✅ Host configuration generated"
 }
 
 # Format disk with disko
@@ -366,7 +366,7 @@ format_disk() {
   local host_dir="$PROJECT_ROOT/hosts/$HOSTNAME"
   local disko_config="$host_dir/disks.nix"
 
-  gum style --foreground="#0066cc" "💾 Formatting disk $DISK with ZFS"
+  gum style --foreground="#5277C3" "💾 Formatting disk $DISK with ZFS"
 
   # Set the hostId on the live system BEFORE creating the ZFS pool
   # so the pool is stamped with the same hostId the installed system will use.
@@ -375,7 +375,7 @@ format_disk() {
   zgenhostid "$HOST_ID"
 
   # Unmount any existing partitions
-  gum style --foreground="#ffaa00" "Unmounting existing partitions..."
+  gum style --foreground="#FFC107" "Unmounting existing partitions..."
   for partition in $(lsblk -nr -o NAME "$DISK" | tail -n +2 2>/dev/null || true); do
     partition_path="/dev/$partition"
     if mount | grep -q "^$partition_path"; then
@@ -389,23 +389,23 @@ format_disk() {
   fi
 
   # Run disko
-  gum style --foreground="#ffaa00" "Running disko (this may take a few minutes)..."
+  gum style --foreground="#FFC107" "Running disko (this may take a few minutes)..."
 
   # ZFS encryption will prompt for passphrase during disko
 
   if ! disko --mode disko "$disko_config"; then
-    gum style --foreground="#ff0000" "❌ Disk formatting failed!"
+    gum style --foreground="#DC3545" "❌ Disk formatting failed!"
     exit 1
   fi
 
-  gum style --foreground="#00cc00" "✅ Disk formatting completed"
+  gum style --foreground="#28A745" "✅ Disk formatting completed"
 }
 
 # Generate hardware configuration
 generate_hardware_config() {
   local host_dir="$PROJECT_ROOT/hosts/$HOSTNAME"
 
-  gum style --foreground="#0066cc" "🔧 Generating hardware configuration"
+  gum style --foreground="#5277C3" "🔧 Generating hardware configuration"
 
   # Generate hardware configuration
   nixos-generate-config --root /mnt --dir /tmp/nixos-config
@@ -453,12 +453,12 @@ $(sed -n '/powerManagement\./p' /tmp/nixos-config/hardware-configuration.nix | s
 EOF
   fi
 
-  gum style --foreground="#00cc00" "✅ Hardware configuration generated"
+  gum style --foreground="#28A745" "✅ Hardware configuration generated"
 }
 
 # Install NixOS
 install_nixos() {
-  gum style --foreground="#0066cc" "🚀 Installing NixOS (this will take a while)"
+  gum style --foreground="#5277C3" "🚀 Installing NixOS (this will take a while)"
 
   # Set up Nix configuration for better performance
   export NIX_CONFIG="
@@ -472,16 +472,16 @@ install_nixos() {
 
   # Run installation
   if ! nixos-install --flake "$PROJECT_ROOT#$HOSTNAME" --no-root-passwd; then
-    gum style --foreground="#ff0000" "❌ NixOS installation failed!"
+    gum style --foreground="#DC3545" "❌ NixOS installation failed!"
     exit 1
   fi
 
-  gum style --foreground="#00cc00" "✅ NixOS installation completed"
+  gum style --foreground="#28A745" "✅ NixOS installation completed"
 }
 
 # Configure ZFS bootfs property
 configure_zfs_boot() {
-  gum style --foreground="#0066cc" "🔧 Configuring ZFS boot properties"
+  gum style --foreground="#5277C3" "🔧 Configuring ZFS boot properties"
 
   # Set the bootfs property on the ZFS pool
   zpool set bootfs="$ZFS_POOL_NAME/root" "$ZFS_POOL_NAME"
@@ -490,30 +490,30 @@ configure_zfs_boot() {
   local bootfs_prop
   bootfs_prop=$(zpool get -H -o value bootfs "$ZFS_POOL_NAME")
   if [[ "$bootfs_prop" == "$ZFS_POOL_NAME/root" ]]; then
-    gum style --foreground="#00cc00" "✅ ZFS bootfs property set to: $bootfs_prop"
+    gum style --foreground="#28A745" "✅ ZFS bootfs property set to: $bootfs_prop"
   else
-    gum style --foreground="#ff0000" "❌ Failed to set ZFS bootfs property!"
+    gum style --foreground="#DC3545" "❌ Failed to set ZFS bootfs property!"
     exit 1
   fi
 
-  gum style --foreground="#00cc00" "✅ ZFS boot configuration completed"
+  gum style --foreground="#28A745" "✅ ZFS boot configuration completed"
 }
 
 # Finalize ZFS pool - export and re-import to stamp correct hostId
 finalize_zfs_pool() {
-  gum style --foreground="#0066cc" "🔧 Finalizing ZFS pool (export/re-import for hostId)..."
+  gum style --foreground="#5277C3" "🔧 Finalizing ZFS pool (export/re-import for hostId)..."
 
   umount -R /mnt 2>/dev/null || true
   zpool export "$ZFS_POOL_NAME"
   zpool import -f "$ZFS_POOL_NAME"
   zpool export "$ZFS_POOL_NAME"
 
-  gum style --foreground="#00cc00" "✅ ZFS pool finalized and exported cleanly"
+  gum style --foreground="#28A745" "✅ ZFS pool finalized and exported cleanly"
 }
 
 # Copy flake to new system
 copy_flake() {
-  gum style --foreground="#0066cc" "📦 Copying flake to new system"
+  gum style --foreground="#5277C3" "📦 Copying flake to new system"
 
   local target_dir="/mnt/etc/tuinix"
   mkdir -p "$target_dir"
@@ -524,58 +524,81 @@ copy_flake() {
   # Set proper ownership
   chown -R root:root "$target_dir"
 
-  gum style --foreground="#00cc00" "✅ Flake copied to new system"
+  gum style --foreground="#28A745" "✅ Flake copied to new system"
 }
 
-# Copy flake to user home directory
-copy_flake_to_user() {
-  gum style --foreground="#0066cc" "📦 Copying flake to user home directory"
+# Set up user flake as a git repo with upstream tracking
+setup_user_flake() {
+  gum style --foreground="#5277C3" "📦 Setting up user flake from upstream repo"
 
-  # Create user's tuinix directory
   local user_dir="/mnt/home/user/tuinix"
-  mkdir -p "$user_dir"
+  local host_dir="$PROJECT_ROOT/hosts/$HOSTNAME"
+  local repo_url="https://github.com/timlinux/tuinix.git"
 
-  # Copy entire flake including the new host config
-  cp -r "$PROJECT_ROOT"/* "$user_dir/"
+  # Shallow clone the upstream repo (depth=1 for just HEAD)
+  gum style --foreground="#FFC107" "Cloning upstream tuinix repo (shallow)..."
+  rm -rf "$user_dir"
+  git clone --depth 1 "$repo_url" "$user_dir"
 
-  # Set proper ownership for the user
+  # Copy the generated host configuration into the clone
+  gum style --foreground="#FFC107" "Grafting host configuration for '$HOSTNAME'..."
+  cp -r "$host_dir" "$user_dir/hosts/$HOSTNAME"
+
+  # Register the new host in git and commit
+  git -C "$user_dir" add "hosts/$HOSTNAME"
+  git -C "$user_dir" commit -m "Add host configuration for $HOSTNAME
+
+Generated by tuinix installer on $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+Host ID: $HOST_ID
+Disk: $DISK
+Locale: $LOCALE
+Keymap: $KEYMAP"
+
+  # Set proper ownership for the user (uid/gid 1000)
   chown -R 1000:1000 "$user_dir"
 
-  # Create a symlink for easy access
+  # Create a convenience symlink
   nixos-enter --root /mnt --command "ln -sf /home/user/tuinix /etc/tuinix-user"
 
-  gum style --foreground="#00cc00" "✅ Flake copied to user home: /home/user/tuinix"
+  gum style --foreground="#28A745" "✅ User flake ready at /home/user/tuinix"
+  gum style --foreground="#654321" \
+    "  • Upstream: $repo_url" \
+    "  • Host config committed: hosts/$HOSTNAME/" \
+    "  • Rebuild with: sudo nixos-rebuild switch --flake /home/user/tuinix#$HOSTNAME"
 }
 
 # Setup root password
 setup_root_password() {
-  gum style --foreground="#0066cc" "🔑 Setting up root password"
+  gum style --foreground="#5277C3" "🔑 Setting up root password"
 
   nixos-enter --root /mnt --command "passwd root"
 
-  gum style --foreground="#00cc00" "✅ Root password configured"
+  gum style --foreground="#28A745" "✅ Root password configured"
 }
 
 # Completion and reboot
 complete_installation() {
   gum style \
-    --foreground="#00cc00" \
+    --foreground="#28A745" \
     --border="rounded" \
     --padding="1" \
     --margin="1" \
     "🎉 Installation Complete!" \
     "" \
     "Your tuinix system '$HOSTNAME' is ready!" \
-    "The complete flake has been copied to /etc/tuinix" \
+    "" \
+    "Your personal flake is at: /home/user/tuinix" \
+    "  Rebuild: sudo nixos-rebuild switch --flake /home/user/tuinix#$HOSTNAME" \
+    "  Update:  cd ~/tuinix && git pull && sudo nixos-rebuild switch --flake .#$HOSTNAME" \
     "" \
     "You can now remove the installation media."
 
   echo ""
   if gum confirm "Reboot now?"; then
-    gum style --foreground="#0066cc" "Rebooting..."
+    gum style --foreground="#5277C3" "Rebooting..."
     reboot
   else
-    gum style --foreground="#0066cc" "Remember to reboot when ready!"
+    gum style --foreground="#5277C3" "Remember to reboot when ready!"
   fi
 }
 
@@ -595,7 +618,7 @@ main() {
   install_nixos
   configure_zfs_boot
   copy_flake
-  copy_flake_to_user
+  setup_user_flake
   setup_root_password
   finalize_zfs_pool
 
@@ -603,7 +626,7 @@ main() {
 }
 
 # Trap to cleanup on exit
-trap 'gum style --foreground="#ff0000" "Installation interrupted!"' INT TERM
+trap 'gum style --foreground="#DC3545" "Installation interrupted!"' INT TERM
 
 # Run main function
 main "$@"

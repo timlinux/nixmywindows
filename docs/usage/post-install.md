@@ -29,18 +29,33 @@ Your system includes:
 
 ## System configuration
 
-Your tuinix flake is available in two locations:
+Your tuinix flake is a git repository cloned from upstream:
 
 | Path | Purpose |
 |------|---------|
 | `/etc/tuinix` | System reference copy (read-only for non-root) |
-| `~/tuinix` | Your working copy for making changes |
+| `~/tuinix` | Your git working copy with your host config committed |
+
+The installer creates `~/tuinix` as a shallow clone of the upstream
+tuinix repo with your host-specific configuration (`hosts/<hostname>/`)
+grafted in and committed. This means you can pull upstream improvements
+while keeping your local host customizations.
 
 ### Making changes
 
 ```bash
 cd ~/tuinix
-# Edit files as needed
+# Edit your host config in hosts/$(hostname)/
+sudo nixos-rebuild switch --flake .#$(hostname)
+# Commit your changes
+git add -A && git commit -m "Describe your change"
+```
+
+### Pulling upstream updates
+
+```bash
+cd ~/tuinix
+git pull --rebase
 sudo nixos-rebuild switch --flake .#$(hostname)
 ```
 
@@ -78,8 +93,10 @@ nmcli device wifi connect "SSID" password "password"
 
 ```bash
 cd ~/tuinix
-nix flake update
+git pull --rebase        # Get upstream tuinix improvements
+nix flake update         # Update nixpkgs and other flake inputs
 sudo nixos-rebuild switch --flake .#$(hostname)
+git add flake.lock && git commit -m "Update flake inputs"
 ```
 
 For more on ZFS snapshots and pool management, see the [ZFS Management](zfs.md) guide.

@@ -54,7 +54,7 @@ repos:
   - repo: https://github.com/Riverside-Healthcare/djLint
     rev: v1.36.4
     hooks:
-      - id: djlint-html
+      - id: djlint
 
   # CSS formatting
   - repo: https://github.com/pre-commit/mirrors-prettier
