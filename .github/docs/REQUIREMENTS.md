@@ -1,5 +1,5 @@
 <div align="center">
-  <img src=".github/assets/LOGO.png" alt="tuinix logo" width="120" height="120">
+  <img src="../assets/LOGO.png" alt="tuinix logo" width="120" height="120">
   
   # TUINIX
   ## A Pure Terminal Based Linux Experience
