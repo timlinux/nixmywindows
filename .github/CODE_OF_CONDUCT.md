@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/LOGO.png" alt="nixmywindows logo" width="80" height="80">
+  <img src="assets/LOGO.png" alt="nixtui logo" width="80" height="80">
   
   # Code of Conduct
   

@@ -4,7 +4,7 @@
 with lib;
 
 {
-  options.nixmywindows.zfs = {
+  options.nixtui.zfs = {
     enable = mkEnableOption "Enable ZFS filesystem support";
     
     encryption = mkEnableOption "Enable ZFS encryption";
@@ -18,11 +18,11 @@ with lib;
     };
   };
 
-  config = mkIf config.nixmywindows.zfs.enable {
+  config = mkIf config.nixtui.zfs.enable {
     # Enable ZFS support
     boot.supportedFilesystems = [ "zfs" ];
     boot.zfs = {
-      requestEncryptionCredentials = config.nixmywindows.zfs.encryption;
+      requestEncryptionCredentials = config.nixtui.zfs.encryption;
       forceImportRoot = true;
     };
     
@@ -33,7 +33,7 @@ with lib;
         interval = "weekly";
       };
       
-      autoSnapshot = mkIf config.nixmywindows.zfs.autoSnapshot {
+      autoSnapshot = mkIf config.nixtui.zfs.autoSnapshot {
         enable = true;
         frequent = 4;
         hourly = 24;

@@ -1,19 +1,19 @@
 <div align="center">
-  <img src="assets/LOGO.png" alt="nixmywindows logo" width="80" height="80">
+  <img src="assets/LOGO.png" alt="nixtui logo" width="80" height="80">
   
-  # Claude Configuration for nixmywindows
+  # Claude Configuration for nixtui
   
   **AI Assistant directives for consistent, productive collaboration** 🤖
 </div>
 
-This file contains Claude-specific configurations and directives to ensure consistent and productive AI assistance sessions for the nixmywindows project. It serves as a guide for maintaining project context and workflow consistency across multiple AI-assisted development sessions.
+This file contains Claude-specific configurations and directives to ensure consistent and productive AI assistance sessions for the nixtui project. It serves as a guide for maintaining project context and workflow consistency across multiple AI-assisted development sessions.
 
 ## Project Context
 
-**Project Name**: nixmywindows  
+**Project Name**: nixtui  
 **Description**: A pure terminal-based Linux experience built on NixOS with ZFS encryption  
 **Primary Technologies**: NixOS, Nix Flakes, ZFS, Terminal-based tools  
-**Repository**: https://github.com/timlinux/nixmywindows
+**Repository**: https://github.com/timlinux/nixtui
 
 ## Key Project Information
 
@@ -32,13 +32,13 @@ This file contains Claude-specific configurations and directives to ensure consi
 ### Development Workflow
 ```bash
 # Build system
-nix build .#nixosConfigurations.nixmywindows.config.system.build.toplevel
+nix build .#nixosConfigurations.nixtui.config.system.build.toplevel
 
 # Check flake
 nix flake check
 
 # Build ISO
-nix build .#nixosConfigurations.nixmywindows.config.system.build.isoImage
+nix build .#nixosConfigurations.nixtui.config.system.build.isoImage
 
 # Format code
 nix fmt
@@ -81,10 +81,10 @@ When making changes:
 nix flake check --show-trace
 
 # Build system configuration
-nix build .#nixosConfigurations.nixmywindows.config.system.build.toplevel
+nix build .#nixosConfigurations.nixtui.config.system.build.toplevel
 
 # Build installer ISO
-nix build .#nixosConfigurations.nixmywindows.config.system.build.isoImage
+nix build .#nixosConfigurations.nixtui.config.system.build.isoImage
 
 # Format all Nix files
 nix fmt
@@ -99,10 +99,10 @@ nix flake update
 nix develop
 
 # Test configuration changes
-nixos-rebuild test --flake .#nixmywindows
+nixos-rebuild test --flake .#nixtui
 
 # Switch to new configuration
-nixos-rebuild switch --flake .#nixmywindows
+nixos-rebuild switch --flake .#nixtui
 ```
 
 ## Project Goals and Constraints
@@ -166,7 +166,7 @@ nixos-rebuild switch --flake .#nixmywindows
 ## Contact Information
 
 **Primary Maintainer**: Tim Sutton (timlinux)  
-**Project Repository**: https://github.com/timlinux/nixmywindows  
+**Project Repository**: https://github.com/timlinux/nixtui  
 **Issues**: Use GitHub issue templates for bug reports and feature requests
 
 ---

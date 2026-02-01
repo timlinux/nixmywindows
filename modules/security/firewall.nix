@@ -4,7 +4,7 @@
 with lib;
 
 {
-  options.nixmywindows.security.firewall = {
+  options.nixtui.security.firewall = {
     enable = mkEnableOption "Enable firewall";
     
     allowedTCPPorts = mkOption {
@@ -20,11 +20,11 @@ with lib;
     };
   };
 
-  config = mkIf config.nixmywindows.security.firewall.enable {
+  config = mkIf config.nixtui.security.firewall.enable {
     networking.firewall = {
       enable = true;
-      allowedTCPPorts = config.nixmywindows.security.firewall.allowedTCPPorts;
-      allowedUDPPorts = config.nixmywindows.security.firewall.allowedUDPPorts;
+      allowedTCPPorts = config.nixtui.security.firewall.allowedTCPPorts;
+      allowedUDPPorts = config.nixtui.security.firewall.allowedUDPPorts;
       
       # Default deny policy
       rejectPackets = true;

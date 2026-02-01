@@ -4,7 +4,7 @@
 with lib;
 
 {
-  options.nixmywindows.security.ssh = {
+  options.nixtui.security.ssh = {
     enable = mkEnableOption "Enable SSH server";
     
     port = mkOption {
@@ -26,14 +26,14 @@ with lib;
     };
   };
 
-  config = mkIf config.nixmywindows.security.ssh.enable {
+  config = mkIf config.nixtui.security.ssh.enable {
     services.openssh = {
       enable = true;
-      ports = [ config.nixmywindows.security.ssh.port ];
+      ports = [ config.nixtui.security.ssh.port ];
       
       settings = {
-        PermitRootLogin = config.nixmywindows.security.ssh.permitRootLogin;
-        PasswordAuthentication = config.nixmywindows.security.ssh.passwordAuthentication;
+        PermitRootLogin = config.nixtui.security.ssh.permitRootLogin;
+        PasswordAuthentication = config.nixtui.security.ssh.passwordAuthentication;
         
         # Security hardening
         Protocol = 2;
@@ -45,8 +45,8 @@ with lib;
     };
     
     # Add SSH port to firewall if enabled
-    nixmywindows.security.firewall.allowedTCPPorts = 
-      mkIf config.nixmywindows.security.firewall.enable 
-        [ config.nixmywindows.security.ssh.port ];
+    nixtui.security.firewall.allowedTCPPorts = 
+      mkIf config.nixtui.security.firewall.enable 
+        [ config.nixtui.security.ssh.port ];
   };
 }

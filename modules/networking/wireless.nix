@@ -4,11 +4,11 @@
 with lib;
 
 {
-  options.nixmywindows.networking.wireless = {
+  options.nixtui.networking.wireless = {
     enable = mkEnableOption "Enable wireless networking";
   };
 
-  config = mkIf config.nixmywindows.networking.wireless.enable {
+  config = mkIf config.nixtui.networking.wireless.enable {
     # Wireless networking
     networking.wireless = {
       enable = true;

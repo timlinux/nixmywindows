@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Rebuild NixOS from the local nixmywindows flake
+# Rebuild NixOS from the local nixtui flake
 # Usage: sudo ./rebuild.sh [switch|boot|test]
 
 set -euo pipefail
@@ -31,4 +31,5 @@ echo "Rebuilding NixOS from: $FLAKE_DIR#$HOSTNAME"
 echo "Action: $ACTION"
 echo ""
 
+export NIX_CONFIG="experimental-features = nix-command flakes"
 nixos-rebuild "$ACTION" --flake "$FLAKE_DIR#$HOSTNAME"

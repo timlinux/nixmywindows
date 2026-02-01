@@ -4,7 +4,7 @@
 with lib;
 
 {
-  options.nixmywindows.networking.ethernet = {
+  options.nixtui.networking.ethernet = {
     enable = mkEnableOption "Enable ethernet networking";
 
     useDHCP = mkOption {
@@ -14,11 +14,11 @@ with lib;
     };
   };
 
-  config = mkIf config.nixmywindows.networking.ethernet.enable {
+  config = mkIf config.nixtui.networking.ethernet.enable {
     # Enable networking
     networking = {
       # Use DHCP by default
-      useDHCP = lib.mkDefault config.nixmywindows.networking.ethernet.useDHCP;
+      useDHCP = lib.mkDefault config.nixtui.networking.ethernet.useDHCP;
 
       # Enable systemd-networkd for network management
       useNetworkd = lib.mkDefault true;

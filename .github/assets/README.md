@@ -1,6 +1,6 @@
 # Assets Directory
 
-This directory contains visual assets for the nixmywindows project.
+This directory contains visual assets for the nixtui project.
 
 ## Current Assets
 
@@ -29,10 +29,10 @@ This directory contains visual assets for the nixmywindows project.
 
 ### File Naming Convention
 Once processed, use this naming:
-- `nixmywindows-logo.svg` - Main vector logo
-- `nixmywindows-logo-transparent.png` - PNG with transparent background
-- `nixmywindows-icon.svg` - Icon-only version
-- `nixmywindows-wordmark.svg` - Text-only version
+- `nixtui-logo.svg` - Main vector logo
+- `nixtui-logo-transparent.png` - PNG with transparent background
+- `nixtui-icon.svg` - Icon-only version
+- `nixtui-wordmark.svg` - Text-only version
 
 ## Brand Consistency
 All assets should follow the guidelines in [BRAND.md](../BRAND.md) for:

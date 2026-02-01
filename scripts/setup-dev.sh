@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
-# Development Environment Setup Script for nixmywindows
+# Development Environment Setup Script for nixtui
 # This script sets up pre-commit hooks and development tools
 
 set -euo pipefail
 
-echo "🚀 Setting up nixmywindows development environment..."
+echo "🚀 Setting up nixtui development environment..."
 
 # Check if we're in the right directory
 if [[ ! -f "flake.nix" && ! -f ".pre-commit-config.yaml" ]]; then
-    echo "❌ This doesn't appear to be the nixmywindows repository root"
+    echo "❌ This doesn't appear to be the nixtui repository root"
     echo "   Please run this script from the repository root directory"
     exit 1
 fi

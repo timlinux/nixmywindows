@@ -7,9 +7,6 @@
     isNormalUser = true;
     description = "System Administrator";
     extraGroups = [ "wheel" "systemd-journal" "docker" ];
-    shell = pkgs.fish;
-
-    # Home directory
     home = "/home/admin";
     createHome = true;
 

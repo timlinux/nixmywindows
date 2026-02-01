@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# nixmywindows Interactive Installer
+# nixtui Interactive Installer
 # A comprehensive installer using gum for rich interactive UX
 
 set -euo pipefail
@@ -58,14 +58,14 @@ check_root() {
 
 # Show build information
 show_build_info() {
-  if [[ -f "/iso/nixmywindows/build-info.txt" ]]; then
+  if [[ -f "/iso/nixtui/build-info.txt" ]]; then
     echo ""
     gum style \
       --foreground="#00cc00" \
       --border="rounded" \
       --padding="1" \
       --margin="1" \
-      "$(cat /iso/nixmywindows/build-info.txt)"
+      "$(cat /iso/nixtui/build-info.txt)"
     echo ""
   else
     echo "Build info not available"
@@ -82,7 +82,7 @@ show_welcome() {
     --border="rounded" \
     --margin="1" \
     --padding="1" \
-    "🍃 nixmywindows Interactive Installer" \
+    "🍃 nixtui Interactive Installer" \
     "" \
     "This installer will guide you through setting up" \
     "a complete NixOS system with ZFS encryption." \
@@ -283,7 +283,7 @@ show_summary() {
 # Generate host configuration
 generate_host_config() {
   # Copy flake to writable location first
-  local work_dir="/tmp/nixmywindows-install"
+  local work_dir="/tmp/nixtui-install"
   gum style --foreground="#0066cc" "📁 Copying flake to writable location: $work_dir"
 
   rm -rf "$work_dir"
@@ -314,8 +314,8 @@ generate_host_config() {
   system.stateVersion = "25.11";
 
   # Enable ZFS support
-  nixmywindows.zfs.enable = true;
-  nixmywindows.zfs.encryption = true;
+  nixtui.zfs.enable = true;
+  nixtui.zfs.encryption = true;
 
   # Locale configuration
   i18n.defaultLocale = "$LOCALE";
@@ -525,7 +525,7 @@ finalize_zfs_pool() {
 copy_flake() {
   gum style --foreground="#0066cc" "📦 Copying flake to new system"
 
-  local target_dir="/mnt/etc/nixmywindows"
+  local target_dir="/mnt/etc/nixtui"
   mkdir -p "$target_dir"
 
   # Copy entire flake including the new host config
@@ -541,8 +541,8 @@ copy_flake() {
 copy_flake_to_user() {
   gum style --foreground="#0066cc" "📦 Copying flake to user home directory"
 
-  # Create user's nixmywindows directory
-  local user_dir="/mnt/home/user/nixmywindows"
+  # Create user's nixtui directory
+  local user_dir="/mnt/home/user/nixtui"
   mkdir -p "$user_dir"
 
   # Copy entire flake including the new host config
@@ -552,9 +552,9 @@ copy_flake_to_user() {
   chown -R 1000:1000 "$user_dir"
 
   # Create a symlink for easy access
-  nixos-enter --root /mnt --command "ln -sf /home/user/nixmywindows /etc/nixmywindows-user"
+  nixos-enter --root /mnt --command "ln -sf /home/user/nixtui /etc/nixtui-user"
 
-  gum style --foreground="#00cc00" "✅ Flake copied to user home: /home/user/nixmywindows"
+  gum style --foreground="#00cc00" "✅ Flake copied to user home: /home/user/nixtui"
 }
 
 # Setup root password
@@ -575,8 +575,8 @@ complete_installation() {
     --margin="1" \
     "🎉 Installation Complete!" \
     "" \
-    "Your nixmywindows system '$HOSTNAME' is ready!" \
-    "The complete flake has been copied to /etc/nixmywindows" \
+    "Your nixtui system '$HOSTNAME' is ready!" \
+    "The complete flake has been copied to /etc/nixtui" \
     "" \
     "You can now remove the installation media."
 

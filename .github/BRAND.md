@@ -1,12 +1,12 @@
-# nixmywindows Brand Design Guide
+# nixtui Brand Design Guide
 
 <div align="center">
-  <img src="assets/LOGO.png" alt="nixmywindows logo" width="200" height="200">
+  <img src="assets/LOGO.png" alt="nixtui logo" width="200" height="200">
 </div>
 
 ## Brand Overview
 
-**nixmywindows** represents the convergence of African heritage, technical excellence, and terminal-first computing. Our brand embodies warmth, community, and the power of thoughtful minimalism.
+**nixtui** represents the convergence of African heritage, technical excellence, and terminal-first computing. Our brand embodies warmth, community, and the power of thoughtful minimalism.
 
 ## Color Palette
 
@@ -78,7 +78,7 @@ Extracted from the logo, our color palette reflects earthy, warm tones that conv
 1. **Primary Logo**: Full color on light backgrounds
 2. **Monochrome**: Black or white for single-color applications
 3. **Icon Only**: The face/hat symbol for small spaces
-4. **Text Only**: "nixmywindows" in Ubuntu font when logo isn't practical
+4. **Text Only**: "nixtui" in Ubuntu font when logo isn't practical
 
 ### Clear Space
 - Minimum clear space: 1x the height of the logo
@@ -97,7 +97,7 @@ Extracted from the logo, our color palette reflects earthy, warm tones that conv
 ## Mascot Character
 
 ### Character Description
-Our mascot represents the spirit of nixmywindows:
+Our mascot represents the spirit of nixtui:
 - **Name**: Nix (open to community naming)
 - **Personality**: Wise, helpful, technically savvy, warm
 - **Visual Style**: The character from our logo - friendly face with characteristic hat
@@ -144,10 +144,10 @@ Our mascot represents the spirit of nixmywindows:
 ## File Formats and Assets
 
 ### Logo Files (to be created)
-- `nixmywindows-logo.svg` - Primary vector format
-- `nixmywindows-logo.png` - Web/digital use
-- `nixmywindows-icon.svg` - Icon-only version
-- `nixmywindows-wordmark.svg` - Text-only version
+- `nixtui-logo.svg` - Primary vector format
+- `nixtui-logo.png` - Web/digital use
+- `nixtui-icon.svg` - Icon-only version
+- `nixtui-wordmark.svg` - Text-only version
 
 ### Color Swatches
 - Adobe Swatch Exchange (ASE) file

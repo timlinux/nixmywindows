@@ -1,7 +1,7 @@
 <div align="center">
-  <img src=".github/assets/LOGO.png" alt="nixmywindows logo" width="120" height="120">
+  <img src=".github/assets/LOGO.png" alt="nixtui logo" width="120" height="120">
   
-  # NIX MY WINDOWS
+  # NIXTUI
   
   **A Pure Terminal Based Linux Experience**
 </div>
@@ -9,8 +9,8 @@
 <div align="center">
 
 <!-- CI/CD Status -->
-![CI](https://github.com/timlinux/nixmywindows/workflows/CI/badge.svg)
-![Release](https://github.com/timlinux/nixmywindows/workflows/Release/badge.svg)
+![CI](https://github.com/timlinux/nixtui/workflows/CI/badge.svg)
+![Release](https://github.com/timlinux/nixtui/workflows/Release/badge.svg)
 
 <!-- Quality Assurance -->
 [![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
@@ -33,16 +33,16 @@
 [![ZFS](https://img.shields.io/badge/filesystem-ZFS-orange.svg)](https://openzfs.org/)
 
 <!-- Community -->
-[![Contributors](https://img.shields.io/github/contributors/timlinux/nixmywindows.svg)](https://github.com/timlinux/nixmywindows/graphs/contributors)
-[![Issues](https://img.shields.io/github/issues/timlinux/nixmywindows.svg)](https://github.com/timlinux/nixmywindows/issues)
-[![Pull Requests](https://img.shields.io/github/issues-pr/timlinux/nixmywindows.svg)](https://github.com/timlinux/nixmywindows/pulls)
-[![Last Commit](https://img.shields.io/github/last-commit/timlinux/nixmywindows.svg)](https://github.com/timlinux/nixmywindows/commits/main)
+[![Contributors](https://img.shields.io/github/contributors/timlinux/nixtui.svg)](https://github.com/timlinux/nixtui/graphs/contributors)
+[![Issues](https://img.shields.io/github/issues/timlinux/nixtui.svg)](https://github.com/timlinux/nixtui/issues)
+[![Pull Requests](https://img.shields.io/github/issues-pr/timlinux/nixtui.svg)](https://github.com/timlinux/nixtui/pulls)
+[![Last Commit](https://img.shields.io/github/last-commit/timlinux/nixtui.svg)](https://github.com/timlinux/nixtui/commits/main)
 
 </div>
 
 This project creates a useable, user-friendly, terminal-centric Linux experience based on NixOS. Experience the power of a purely functional operating system with modern terminal tools, all without the complexity of graphical desktop environments.
 
-**🔥 Ready to install?** Download `nixmywindows.v1.iso` - a single, self-contained bootable ISO that includes both the installer and complete system configuration. No internet required for installation!
+**🔥 Ready to install?** Download `nixtui.v1.iso` - a single, self-contained bootable ISO that includes both the installer and complete system configuration. No internet required for installation!
 
 ## ✨ Features
 
@@ -78,33 +78,33 @@ This project creates a useable, user-friendly, terminal-centric Linux experience
 ### Installation
 
 1. **Get the ISO**
-   - Download `nixmywindows.v1.iso` from releases, or
+   - Download `nixtui.v1.iso` from releases, or
    - Build locally: `./scripts/build-iso.sh`
 
 2. **Create bootable media**
    ```bash
    # Flash to USB drive (replace /dev/sdX with your USB device)
-   sudo dd if=nixmywindows.v1.iso of=/dev/sdX bs=4M status=progress
+   sudo dd if=nixtui.v1.iso of=/dev/sdX bs=4M status=progress
    ```
 
 3. **Install the system**
    - Boot from the USB drive
-   - The ISO contains both the installer and complete nixmywindows configuration
+   - The ISO contains both the installer and complete nixtui configuration
    - See [INSTALL.md](INSTALL.md) for detailed installation instructions
-   - Quick install: `sudo nixos-install --flake /iso/nixmywindows#laptop`
+   - Quick install: `sudo nixos-install --flake /iso/nixtui#laptop`
 
 ### Development Setup
 
 ```bash
 # Clone the repository
-git clone https://github.com/timlinux/nixmywindows.git
-cd nixmywindows
+git clone https://github.com/timlinux/nixtui.git
+cd nixtui
 
 # Build the system
-nix build .#nixosConfigurations.nixmywindows.config.system.build.toplevel
+nix build .#nixosConfigurations.nixtui.config.system.build.toplevel
 
 # Build ISO image for testing
-nix build .#nixosConfigurations.nixmywindows.config.system.build.isoImage
+nix build .#nixosConfigurations.nixtui.config.system.build.isoImage
 
 # Test in a virtual machine
 nix run .#vm
@@ -163,7 +163,7 @@ This sets up all pre-commit hooks and development tools automatically.
 ## 🏗️ Architecture
 
 ```
-nixmywindows/
+nixtui/
 ├── flake.nix              # Main Nix flake configuration
 ├── configuration.nix      # System configuration
 ├── hardware/              # Hardware-specific configurations
@@ -177,11 +177,11 @@ nixmywindows/
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 ### Ways to Contribute
-- 🐛 [Report bugs](https://github.com/timlinux/nixmywindows/issues/new?template=bug_report.yml)
-- 💡 [Request features](https://github.com/timlinux/nixmywindows/issues/new?template=feature_request.yml)
+- 🐛 [Report bugs](https://github.com/timlinux/nixtui/issues/new?template=bug_report.yml)
+- 💡 [Request features](https://github.com/timlinux/nixtui/issues/new?template=feature_request.yml)
 - 📖 Improve documentation
 - 🔧 Submit pull requests
-- ❓ [Ask questions](https://github.com/timlinux/nixmywindows/issues/new?template=question.yml)
+- ❓ [Ask questions](https://github.com/timlinux/nixtui/issues/new?template=question.yml)
 
 ### Development Workflow
 1. Fork the repository
@@ -238,8 +238,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 - 📚 [Documentation](./.github/docs/)
-- 💬 [Discussions](https://github.com/timlinux/nixmywindows/discussions)
-- 🐛 [Issue Tracker](https://github.com/timlinux/nixmywindows/issues)
+- 💬 [Discussions](https://github.com/timlinux/nixtui/discussions)
+- 🐛 [Issue Tracker](https://github.com/timlinux/nixtui/issues)
 - 📧 [Email Support](mailto:timlinux@example.com)
 
 ## 👥 Contributors
@@ -254,4 +254,4 @@ This project is made possible by our amazing contributors:
 
 ---
 
-**Built with ❤️ by [Tim Sutton](https://github.com/timlinux) and the nixmywindows community.**
+**Built with ❤️ by [Tim Sutton](https://github.com/timlinux) and the nixtui community.**

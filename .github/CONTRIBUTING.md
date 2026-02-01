@@ -1,12 +1,12 @@
 <div align="center">
-  <img src="assets/LOGO.png" alt="nixmywindows logo" width="80" height="80">
+  <img src="assets/LOGO.png" alt="nixtui logo" width="80" height="80">
   
-  # Contributing to nixmywindows
+  # Contributing to nixtui
   
-  **Welcome to the nixmywindows contributor community!** 🎉
+  **Welcome to the nixtui contributor community!** 🎉
 </div>
 
-Thank you for your interest in contributing to nixmywindows! We welcome contributions from everyone and appreciate your help in making this project better.
+Thank you for your interest in contributing to nixtui! We welcome contributions from everyone and appreciate your help in making this project better.
 
 Whether you're fixing a bug, adding a feature, improving documentation, or sharing ideas, your contribution helps build a better terminal-based Linux experience for everyone. The Ubuntu philosophy of "I am because we are" is at the heart of our project - we're stronger together!
 
@@ -39,9 +39,9 @@ This project and everyone participating in it is governed by our [Code of Conduc
 
 ### Reporting Bugs
 
-Before reporting a bug, please check the [issue tracker](https://github.com/timlinux/nixmywindows/issues) to see if the bug has already been reported.
+Before reporting a bug, please check the [issue tracker](https://github.com/timlinux/nixtui/issues) to see if the bug has already been reported.
 
-When reporting bugs, please use the [bug report template](https://github.com/timlinux/nixmywindows/issues/new?template=bug_report.yml) and include:
+When reporting bugs, please use the [bug report template](https://github.com/timlinux/nixtui/issues/new?template=bug_report.yml) and include:
 
 - A clear and descriptive title
 - Steps to reproduce the issue
@@ -52,7 +52,7 @@ When reporting bugs, please use the [bug report template](https://github.com/tim
 
 ### Suggesting Features
 
-Feature requests are welcome! Please use the [feature request template](https://github.com/timlinux/nixmywindows/issues/new?template=feature_request.yml) and include:
+Feature requests are welcome! Please use the [feature request template](https://github.com/timlinux/nixtui/issues/new?template=feature_request.yml) and include:
 
 - A clear and descriptive title
 - A detailed description of the proposed feature
@@ -61,7 +61,7 @@ Feature requests are welcome! Please use the [feature request template](https://
 
 ### Asking Questions
 
-If you have questions about using nixmywindows, please use the [question template](https://github.com/timlinux/nixmywindows/issues/new?template=question.yml) or start a [discussion](https://github.com/timlinux/nixmywindows/discussions).
+If you have questions about using nixtui, please use the [question template](https://github.com/timlinux/nixtui/issues/new?template=question.yml) or start a [discussion](https://github.com/timlinux/nixtui/discussions).
 
 ## Development Setup
 
@@ -75,11 +75,11 @@ If you have questions about using nixmywindows, please use the [question templat
 
 ```bash
 # Clone your fork
-git clone https://github.com/YOUR_USERNAME/nixmywindows.git
-cd nixmywindows
+git clone https://github.com/YOUR_USERNAME/nixtui.git
+cd nixtui
 
 # Add the upstream repository as a remote
-git remote add upstream https://github.com/timlinux/nixmywindows.git
+git remote add upstream https://github.com/timlinux/nixtui.git
 
 # Run the development setup script (sets up pre-commit hooks and tools)
 ../scripts/setup-dev.sh
@@ -88,7 +88,7 @@ git remote add upstream https://github.com/timlinux/nixmywindows.git
 nix develop
 
 # Build the system to test your changes
-nix build .#nixosConfigurations.nixmywindows.config.system.build.toplevel
+nix build .#nixosConfigurations.nixtui.config.system.build.toplevel
 ```
 
 ### Building and Testing
@@ -98,7 +98,7 @@ nix build .#nixosConfigurations.nixmywindows.config.system.build.toplevel
 nix flake check
 
 # Build the ISO image
-nix build .#nixosConfigurations.nixmywindows.config.system.build.isoImage
+nix build .#nixosConfigurations.nixtui.config.system.build.isoImage
 
 # Test in a virtual machine (if supported)
 nix run .#vm
@@ -171,7 +171,7 @@ docs(readme): update installation instructions
 2. **Test your changes**:
    ```bash
    nix flake check
-   nix build .#nixosConfigurations.nixmywindows.config.system.build.toplevel
+   nix build .#nixosConfigurations.nixtui.config.system.build.toplevel
    ```
 
 3. **Review your commits**:
@@ -223,9 +223,9 @@ Contributors are recognized in several ways:
 
 ### Communication Channels
 
-- [GitHub Discussions](https://github.com/timlinux/nixmywindows/discussions) - General discussions
-- [GitHub Issues](https://github.com/timlinux/nixmywindows/issues) - Bug reports and feature requests
-- [Pull Requests](https://github.com/timlinux/nixmywindows/pulls) - Code contributions
+- [GitHub Discussions](https://github.com/timlinux/nixtui/discussions) - General discussions
+- [GitHub Issues](https://github.com/timlinux/nixtui/issues) - Bug reports and feature requests
+- [Pull Requests](https://github.com/timlinux/nixtui/pulls) - Code contributions
 
 ### Getting Help
 
@@ -244,4 +244,4 @@ If you need help contributing:
 
 ---
 
-Thank you for contributing to nixmywindows! Your efforts help make this project better for everyone.
+Thank you for contributing to nixtui! Your efforts help make this project better for everyone.

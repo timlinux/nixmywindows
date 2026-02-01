@@ -1,4 +1,4 @@
-# Disko configuration template for nixmywindows
+# Disko configuration template for nixtui
 # Variables to be interpolated:
 # - {{DISK_DEVICE}} - Target disk device (e.g., /dev/sda, /dev/nvme0n1, /dev/vda)
 # - {{HOSTNAME}} - System hostname

@@ -614,3 +614,51 @@ RESULT:
 - New installations will properly configure ZFS boot support
 - 3.3GB disk usage is acceptable for minimal install
 - Boot hanging should be resolved with proper ZFS configuration
+
+---
+Date: 2026-01-31
+Prompt: I want to pick up again on the work I was doing in this project. Where I am at now is that the installer seems to work, I format the disk with zfs etc, but when I reboot it does not reboot from the zfs pool. I am testing in a vm.
+
+Changes made:
+1. Added OVMF UEFI firmware support to run-vm.sh (was using SeaBIOS which can't boot EFI)
+2. Added zfsSupport = true to boot.nix GRUB config
+3. Replaced hardcoded kernel 6.6 with ZFS-compatible kernel selection
+4. Removed conflicting postDeviceCommands and extraPools from install.sh hardware template
+5. Removed duplicate grub-install and nixos-rebuild boot from configure_zfs_boot (nixos-install handles this)
+6. Added nixmywindows.zfs.enable and encryption to generated host config
+7. Removed duplicate module imports from generated default.nix
+8. Fixed stateVersion from 24.05 to 25.11
+9. Updated INSTALL.md with interactive installer instructions and VM testing section
+
+---
+Date: 2026-01-31
+Prompt: it is sooo close - but see the screenshot in my home directory - I can see the zfs module is loaded at boot but it does not manage to find the volume, Can you look at my virtman configuration and see if you can diagnose the issue
+
+Diagnosis: VM had Secure Boot enabled (edk2-x86_64-secure-code.fd with secure='yes'). ZFS is an out-of-tree kernel module and is not signed for Secure Boot, causing pool import to fail even though the module appeared to load.
+
+Fix applied:
+- Disabled Secure Boot in VM XML
+- Switched firmware from edk2-x86_64-secure-code.fd to edk2-x86_64-code.fd
+- Disabled SMM (only needed for secure boot)
+- Reset NVRAM to fresh non-secure state
+
+---
+Date: 2026-01-31
+Prompt: still not booting, look at screenshot, inspect VM
+
+Diagnosis: The host machine also has a pool named NIXROOT. The pool inside the VM was created by the live installer which had a different hostId than the installed system. On first boot, `zpool import NIXROOT` fails with "no such pool available" because forceImportRoot was false and the hostId didn't match.
+
+Fixes:
+1. Set boot.zfs.forceImportRoot = true in both zfs.nix and install.sh hardware template
+2. Added export/re-import step in configure_zfs_boot to stamp the pool with the correct hostId
+
+---
+Date: 2026-01-31
+Prompt: honestly you just have me chasing my tail here. look at the screenshot, we are no closer to a solution than we were at the start of this morning
+
+Root cause found: NixOS ZFS stage-1-init.sh imports pools using `zpool import -d /dev/disk/by-id`. Virtio disks in QEMU/libvirt do NOT create /dev/disk/by-id entries unless the disk has a serial number configured. Without a serial, /dev/disk/by-id is empty and zpool reports "no such pool available".
+
+Fix:
+1. Added <serial>nixmywindows-root</serial> to virt-manager VM disk XML
+2. Added serial=nixmywindows-root to all QEMU drive args in run-vm.sh
+3. Requires reinstall since pool must be created with by-id device visible

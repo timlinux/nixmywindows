@@ -7,7 +7,6 @@
     isNormalUser = true;
     description = "user user";
     extraGroups = [ "wheel" "networkmanager" "audio" "video" ];
-    shell = pkgs.fish;
 
     # Home directory
     home = "/home/user";

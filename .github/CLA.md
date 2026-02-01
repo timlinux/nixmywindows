@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/LOGO.png" alt="nixmywindows logo" width="80" height="80">
+  <img src="assets/LOGO.png" alt="nixtui logo" width="80" height="80">
   
   # Contributor License Agreement (CLA)
   
@@ -8,7 +8,7 @@
 
 ## Individual Contributor License Agreement
 
-Thank you for your interest in contributing to nixmywindows (the "Project")! This Contributor License Agreement ("Agreement") documents the rights granted by contributors to the Project, ensuring that your valuable contributions are properly protected and can be used to benefit the entire community.
+Thank you for your interest in contributing to nixtui (the "Project")! This Contributor License Agreement ("Agreement") documents the rights granted by contributors to the Project, ensuring that your valuable contributions are properly protected and can be used to benefit the entire community.
 
 ### 1. Definitions
 
@@ -46,7 +46,7 @@ Unless required by applicable law or agreed to in writing, You provide Your Cont
 
 To sign this CLA, add your name and email address to the contributors list below by submitting a pull request, or send an email to the project maintainer stating:
 
-"I agree to the terms of the Contributor License Agreement for the nixmywindows project."
+"I agree to the terms of the Contributor License Agreement for the nixtui project."
 
 ## Contributors
 

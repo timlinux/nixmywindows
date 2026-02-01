@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 
-# QEMU VM runner for NixMyWindows
+# QEMU VM runner for NixTUI
 # Usage: ./run-vm.sh [install|run]
 #   install - Boot from ISO for installation
 #   run     - Boot from disk (after installation)
 
 set -e
 
-VM_NAME="nixmywindows"
+VM_NAME="nixtui"
 DEFAULT_DISK_SIZE="50G"
 DEFAULT_MEMORY="8G"
 ENABLE_ENHANCED_VIRTUALIZATION="${ENABLE_ENHANCED_VIRTUALIZATION:-true}"
 DISK_FILE="$VM_NAME.qcow2"
-ISO_FILE="nixmywindows.v1.iso"
-CONFIG_DIR="$HOME/.config/nixmywindows"
+ISO_FILE="nixtui.v1.iso"
+CONFIG_DIR="$HOME/.config/nixtui"
 MEMORY_CONFIG="$CONFIG_DIR/memory"
 DISK_CONFIG="$CONFIG_DIR/disk_size"
 OVMF_VARS_FILE="$CONFIG_DIR/OVMF_VARS.fd"
@@ -104,7 +104,7 @@ inspect_disk() {
   echo "🔍 Inspecting disk contents..."
   
   # Create temporary mount point
-  local mount_point="/tmp/nixmywindows-inspect"
+  local mount_point="/tmp/nixtui-inspect"
   sudo mkdir -p "$mount_point"
   
   # Try to mount the disk as a loop device
@@ -235,7 +235,7 @@ fi
 
 # Simple boot mode selection
 if [ $# -eq 0 ]; then
-  echo "🖥️  NixMyWindows VM Launcher"
+  echo "🖥️  NixTUI VM Launcher"
   echo ""
   
   # Check if disk exists
@@ -352,10 +352,10 @@ case "$BOOT_MODE" in
     -enable-kvm \
     -m "$MEMORY" \
     $BASE_QEMU_ARGS \
-    -drive file="$DISK_FILE",format=qcow2,if=virtio,cache=writethrough,serial=nixmywindows-root \
+    -drive file="$DISK_FILE",format=qcow2,if=virtio,cache=writethrough,serial=nixtui-root \
     -cdrom "$ISO_FILE" \
     -boot order=dc,menu=on \
-    -name "NixMyWindows (ISO Boot)"
+    -name "NixTUI (ISO Boot)"
   ;;
 
 "harddrive")
@@ -414,21 +414,21 @@ case "$BOOT_MODE" in
         -drive if=pflash,format=raw,file="$OVMF_VARS_FILE" \
         -cpu host \
         -smp 2 \
-        -drive file="$DISK_FILE",format=qcow2,if=virtio,serial=nixmywindows-root \
+        -drive file="$DISK_FILE",format=qcow2,if=virtio,serial=nixtui-root \
         -netdev user,id=net0 \
         -device e1000,netdev=net0 \
         -display sdl \
         -boot c \
-        -name "NixMyWindows (Simple)"
+        -name "NixTUI (Simple)"
     else
       echo "Using advanced boot configuration..."
       qemu-system-x86_64 \
         -enable-kvm \
         -m "$MEMORY" \
         $BASE_QEMU_ARGS \
-        -drive file="$DISK_FILE",format=qcow2,if=virtio,cache=writethrough,serial=nixmywindows-root \
+        -drive file="$DISK_FILE",format=qcow2,if=virtio,cache=writethrough,serial=nixtui-root \
         -boot order=c,menu=on \
-        -name "NixMyWindows" \
+        -name "NixTUI" \
         -serial stdio \
         -no-reboot
     fi

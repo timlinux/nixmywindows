@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build bootable ISO for nixmywindows laptop profile
+# Build bootable ISO for nixtui laptop profile
 
 set -euo pipefail
 
@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
 # Version for ISO naming
-VERSION="${NIXMYWINDOWS_VERSION:-v1}"
+VERSION="${NIXTUI_VERSION:-v1}"
 
 # Check if gum is available
 if ! command -v gum >/dev/null 2>&1; then
@@ -21,7 +21,7 @@ gum style \
   --border="rounded" \
   --margin="1" \
   --padding="1" \
-  "🚀 nixmywindows ISO Builder" \
+  "🚀 nixtui ISO Builder" \
   "" \
   "Building bootable ISO with embedded flake" \
   "Working directory: $PROJECT_ROOT" \
@@ -39,7 +39,7 @@ if [[ -L "result" ]]; then
 fi
 
 # Remove any existing ISO files
-for iso_file in nixmywindows.*.iso; do
+for iso_file in nixtui.*.iso; do
   if [[ -f "$iso_file" ]]; then
     rm "$iso_file"
     gum style --foreground="#00cc00" "  ✅ Removed previous ISO: $iso_file"
@@ -47,9 +47,9 @@ for iso_file in nixmywindows.*.iso; do
 done
 
 # Clean up any leftover validation mount points
-if [[ -d "/tmp/nixmywindows-iso-validation" ]]; then
-  sudo umount /tmp/nixmywindows-iso-validation 2>/dev/null || true
-  sudo rmdir /tmp/nixmywindows-iso-validation 2>/dev/null || true
+if [[ -d "/tmp/nixtui-iso-validation" ]]; then
+  sudo umount /tmp/nixtui-iso-validation 2>/dev/null || true
+  sudo rmdir /tmp/nixtui-iso-validation 2>/dev/null || true
   gum style --foreground="#00cc00" "  ✅ Cleaned up validation mount point"
 fi
 
@@ -58,7 +58,7 @@ echo ""
 # Function to validate ISO contents
 validate_iso() {
   local iso_file="$1"
-  local mount_point="/tmp/nixmywindows-iso-validation"
+  local mount_point="/tmp/nixtui-iso-validation"
 
   gum style --foreground="#0066cc" "🔍 Validating ISO contents..."
 
@@ -75,7 +75,7 @@ validate_iso() {
   local validation_results=()
 
   # Check for flake configuration
-  if [[ -f "$mount_point/nixmywindows/flake.nix" && -f "$mount_point/nixmywindows/flake.lock" ]]; then
+  if [[ -f "$mount_point/nixtui/flake.nix" && -f "$mount_point/nixtui/flake.lock" ]]; then
     validation_results+=("✅ Flake configuration found")
   else
     validation_results+=("❌ Missing flake configuration")
@@ -83,7 +83,7 @@ validate_iso() {
   fi
 
   # Check for host configurations
-  if [[ -d "$mount_point/nixmywindows/hosts/laptop" ]]; then
+  if [[ -d "$mount_point/nixtui/hosts/laptop" ]]; then
     validation_results+=("✅ Laptop host configuration found")
   else
     validation_results+=("❌ Missing laptop host configuration")
@@ -91,7 +91,7 @@ validate_iso() {
   fi
 
   # Check for user configurations
-  if [[ -d "$mount_point/nixmywindows/users" ]]; then
+  if [[ -d "$mount_point/nixtui/users" ]]; then
     validation_results+=("✅ User configurations found")
   else
     validation_results+=("❌ Missing user configurations")
@@ -99,7 +99,7 @@ validate_iso() {
   fi
 
   # Check for modules
-  if [[ -d "$mount_point/nixmywindows/modules" ]]; then
+  if [[ -d "$mount_point/nixtui/modules" ]]; then
     validation_results+=("✅ System modules found")
   else
     validation_results+=("❌ Missing system modules")
@@ -107,7 +107,7 @@ validate_iso() {
   fi
 
   # Check for installation README
-  if [[ -f "$mount_point/nixmywindows/README.txt" ]]; then
+  if [[ -f "$mount_point/nixtui/README.txt" ]]; then
     validation_results+=("✅ Installation README found")
   else
     validation_results+=("❌ Missing installation README")
@@ -159,7 +159,7 @@ gum style \
   --foreground="#e95420" \
   --border="rounded" \
   --padding="1" \
-  "🏗️  nixmywindows ISO Build" \
+  "🏗️  nixtui ISO Build" \
   "" \
   "Starting comprehensive build process..." \
   "This may take 10-30 minutes depending on your system"
@@ -192,7 +192,7 @@ if [[ -L "result" && -d "result/iso" ]]; then
     "📁 ISO name: $ISO_NAME"
 
   # Determine final ISO name
-  FINAL_ISO_NAME="nixmywindows.${VERSION}.iso"
+  FINAL_ISO_NAME="nixtui.${VERSION}.iso"
   if [[ -f "./$FINAL_ISO_NAME" ]]; then
     gum style --foreground="#ffaa00" "⚠️  Removing existing ISO: ./$FINAL_ISO_NAME"
     sudo rm "./$FINAL_ISO_NAME"

@@ -1,5 +1,5 @@
 {
-  description = "nixmywindows - A Pure Terminal Based Linux Experience";
+  description = "nixtui - A Pure Terminal Based Linux Experience";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -92,7 +92,7 @@
         buildInputs = devTools;
 
         shellHook = ''
-          echo "🚀 nixmywindows development environment"
+          echo "🚀 nixtui development environment"
           echo ""
           echo "Available commands:"
           echo "  nix build .#nixosConfigurations.<hostname>.config.system.build.toplevel"

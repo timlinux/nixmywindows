@@ -1,4 +1,4 @@
-# nixmywindows installer ISO configuration
+# nixtui installer ISO configuration
 { config, lib, pkgs, modulesPath, ... }:
 
 {
@@ -8,39 +8,39 @@
   isoImage.contents = [
     {
       source = ./flake.nix;
-      target = "/nixmywindows/flake.nix";
+      target = "/nixtui/flake.nix";
     }
     {
       source = ./flake.lock;
-      target = "/nixmywindows/flake.lock";
+      target = "/nixtui/flake.lock";
     }
     {
       source = ./hosts;
-      target = "/nixmywindows/hosts";
+      target = "/nixtui/hosts";
     }
     {
       source = ./modules;
-      target = "/nixmywindows/modules";
+      target = "/nixtui/modules";
     }
     {
       source = ./users;
-      target = "/nixmywindows/users";
+      target = "/nixtui/users";
     }
     {
       source = ./templates;
-      target = "/nixmywindows/templates";
+      target = "/nixtui/templates";
     }
     {
       source = ./scripts;
-      target = "/nixmywindows/scripts";
+      target = "/nixtui/scripts";
     }
     {
       source = ./README.txt;
-      target = "/nixmywindows/README.txt";
+      target = "/nixtui/README.txt";
     }
     {
       source = ./build-info.txt;
-      target = "/nixmywindows/build-info.txt";
+      target = "/nixtui/build-info.txt";
     }
   ];
 
@@ -83,8 +83,8 @@
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Auto-start the installer on boot
-  systemd.services.nixmywindows-installer = {
-    description = "nixmywindows automatic installer";
+  systemd.services.nixtui-installer = {
+    description = "nixtui automatic installer";
     wantedBy = [ "multi-user.target" ];
     after = [ "network.target" ];
     script = ''
@@ -93,14 +93,14 @@
 
       # Clear screen and show installer
       clear
-      echo "🍃 nixmywindows Live Installer"
+      echo "🍃 nixtui Live Installer"
       echo ""
       echo "The installer script is located at /install.sh"
       echo "Run 'sudo /install.sh' to begin installation"
       echo ""
       echo "Or explore the system with:"
-      echo "  • View available hosts: ls /nixmywindows/hosts/"
-      echo "  • Manual installation: nixos-install --flake /nixmywindows#<hostname>"
+      echo "  • View available hosts: ls /nixtui/hosts/"
+      echo "  • Manual installation: nixos-install --flake /nixtui#<hostname>"
       echo ""
     '';
     serviceConfig = {

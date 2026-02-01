@@ -4,7 +4,7 @@
 with lib;
 
 {
-  options.nixmywindows.security.sudo = {
+  options.nixtui.security.sudo = {
     wheelNeedsPassword = mkOption {
       type = types.bool;
       default = true;
@@ -17,7 +17,7 @@ with lib;
     security = {
       sudo = {
         enable = true;
-        wheelNeedsPassword = config.nixmywindows.security.sudo.wheelNeedsPassword;
+        wheelNeedsPassword = config.nixtui.security.sudo.wheelNeedsPassword;
       };
       
       # Prevent non-wheel users from running sudo
