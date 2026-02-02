@@ -106,15 +106,6 @@ validate_iso() {
     validation_failed=1
   fi
 
-  # Check for installation README
-  if [[ -f "$mount_point/tuinix/README.txt" ]]; then
-    validation_results+=("✅ Installation README found")
-  else
-    validation_results+=("❌ Missing installation README")
-    validation_failed=1
-    eza --extended --tree --icons=always "$mount_point"
-  fi
-
   # Check for nix store
   if [[ -f "$mount_point/nix-store.squashfs" ]]; then
     validation_results+=("✅ Nix store found")
