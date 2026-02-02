@@ -744,3 +744,4 @@ PROMPT: occasionally (e.g. now) I will want to push updates to the github pages.
 PROMPT: well we cant have both the action deployment and the gh-pages branch so that is not going to work
 PROMPT.log
 2026-02-02 00:04:44 UTC - Updated homepage Flash & Boot step to recommend balenaEtcher/Ventoy as primary, dd as advanced option
+2026-02-02 00:28:40 UTC - Removed obsolete README.txt validation check from build-iso.sh (file was deleted in previous session)
