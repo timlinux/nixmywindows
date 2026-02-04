@@ -81,17 +81,18 @@ sudo installer
 
 The interactive TUI installer will guide you through:
 
-1. **Username** -- enter your login username
-2. **Full name** -- your display name (used in git config)
-3. **Email** -- your email address (used in git config)
-4. **Password** -- set your login password (entered twice to confirm)
-5. **Hostname** -- name your machine
-6. **Storage mode** -- choose your disk layout strategy (see [Storage Modes](#storage-modes) below)
-7. **Disk selection** -- choose the target disk(s)
-8. **ZFS encryption passphrase** -- set a passphrase for full-disk encryption (skipped for XFS mode)
-9. **Locale and keyboard** -- select your region and layout
-10. **Confirmation** -- review the summary, type `DESTROY` to confirm
-11. **Installation** -- partitioning, formatting, and NixOS install run automatically
+1. **Network check** -- the installer verifies internet connectivity (required for fetching packages). If no connection is detected, you'll be prompted to configure networking and retry.
+2. **Username** -- enter your login username
+3. **Full name** -- your display name (used in git config)
+4. **Email** -- your email address (used in git config)
+5. **Password** -- set your login password (entered twice to confirm)
+6. **Hostname** -- name your machine
+7. **Storage mode** -- choose your disk layout strategy (see [Storage Modes](#storage-modes) below)
+8. **Disk selection** -- choose the target disk(s)
+9. **ZFS encryption passphrase** -- set a passphrase for full-disk encryption (skipped for XFS mode)
+10. **Locale and keyboard** -- select your region and layout
+11. **Confirmation** -- review the summary, type `DESTROY` to confirm
+12. **Installation** -- partitioning, formatting, and NixOS install run automatically. A live log tail is displayed so you can monitor progress.
 
 ## Storage Modes
 
