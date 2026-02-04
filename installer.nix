@@ -51,6 +51,10 @@ in
       source = ./build-info.txt;
       target = "/tuinix/build-info.txt";
     }
+    {
+      source = ./.github/assets/LOGO.png;
+      target = "/tuinix/assets/LOGO.png";
+    }
   ];
 
   # Packages for installation environment - minimal set, no X11/GUI deps
@@ -65,9 +69,11 @@ in
     gptfdisk
     e2fsprogs
     dosfstools
+    xfsprogs
     zfs
     disko
     gum
+    catimg
     bc
     nixos-install-tools
     mkpasswd
