@@ -122,7 +122,7 @@ Boot from USB -- you'll land in `/home/tuinix` with a welcome
 message. Run:
 
 ```bash
-sudo scripts/install.sh
+sudo installer
 ```
 
 > <img src=".github/assets/LOGO.png" width="20">

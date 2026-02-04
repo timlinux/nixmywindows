@@ -76,22 +76,21 @@ Before booting from USB, enter your BIOS/UEFI settings (typically by pressing F2
 Once the USB boots, you'll land in `/home/tuinix` with a welcome message showing the mascot and install instructions. Run:
 
 ```bash
-sudo tuinix-installer
+sudo installer
 ```
 
 The interactive TUI installer will guide you through:
 
-1. **User account** -- enter your username, full name, and email address
-2. **Hostname** -- name your machine
-3. **Disk selection** -- choose the target disk (the installer shows all available disks)
-4. **ZFS encryption** -- set a passphrase for full-disk encryption
-5. **Locale and keyboard** -- select your region and layout
-6. **Confirmation** -- review the summary, type `DESTROY` to confirm
-7. **Installation** -- partitioning, formatting, and NixOS install run automatically
-
-!!! note "Credentials"
-    Your user account will be created with initial password `changeme`.
-    Change this immediately after first login!
+1. **Username** -- enter your login username
+2. **Full name** -- your display name (used in git config)
+3. **Email** -- your email address (used in git config)
+4. **Password** -- set your login password (entered twice to confirm)
+5. **Hostname** -- name your machine
+6. **Disk selection** -- choose the target disk (the installer shows all available disks)
+7. **ZFS encryption passphrase** -- set a passphrase for full-disk encryption (entered twice to confirm)
+8. **Locale and keyboard** -- select your region and layout
+9. **Confirmation** -- review the summary, type `DESTROY` to confirm
+10. **Installation** -- partitioning, formatting, and NixOS install run automatically
 
 ## Step 5: First boot
 
@@ -99,7 +98,7 @@ The interactive TUI installer will guide you through:
 2. Reboot
 3. At the GRUB menu, select tuinix
 4. Enter your ZFS encryption passphrase when prompted
-5. Log in with your configured credentials
+5. Log in with the username and password you set during installation
 
 ## Disk layout
 

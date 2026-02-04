@@ -70,6 +70,7 @@ in
     gum
     bc
     nixos-install-tools
+    mkpasswd
     util-linux
   ];
 

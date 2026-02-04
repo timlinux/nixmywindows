@@ -81,14 +81,14 @@ const tuinixTitle = `████████╗██╗   ██╗██╗�
    ██║   ╚██████╔╝██║██║ ╚████║██║██╔╝ ██╗
    ╚═╝    ╚═════╝ ╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝`
 
-// Styles
+// Styles - off-white text by default, color only for emphasis
 var (
 	titleStyle = lipgloss.NewStyle().
 			Foreground(colorOrange).
 			Bold(true)
 
 	promptStyle = lipgloss.NewStyle().
-			Foreground(colorNixBlue).
+			Foreground(colorOffWhite).
 			Bold(true)
 
 	successStyle = lipgloss.NewStyle().
@@ -101,14 +101,14 @@ var (
 			Foreground(colorAmber)
 
 	detailStyle = lipgloss.NewStyle().
-			Foreground(colorEarth)
+			Foreground(colorDimGray)
 
 	grayStyle = lipgloss.NewStyle().
-			Foreground(colorGray)
+			Foreground(colorDimGray)
 
 	borderStyle = lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
-			BorderForeground(colorOrange)
+			BorderForeground(colorDarkGray)
 
 	headerLogoStyle = lipgloss.NewStyle().
 			Foreground(colorOrange)
@@ -118,12 +118,12 @@ var (
 				Bold(true)
 
 	stepStyle = lipgloss.NewStyle().
-			Foreground(colorAmber).
+			Foreground(colorOffWhite).
 			Bold(true).
 			Align(lipgloss.Center)
 
 	footerStyle = lipgloss.NewStyle().
-			Foreground(colorGray).
+			Foreground(colorDimGray).
 			Align(lipgloss.Center)
 )
 
@@ -137,6 +137,8 @@ const (
 	stateUsername
 	stateFullname
 	stateEmail
+	statePassword
+	statePasswordConfirm
 	stateHostname
 	stateDisk
 	statePassphrase
@@ -199,6 +201,32 @@ so make sure it matches your GitHub/GitLab
 account if you plan to push code.`,
 		stepNum: 3,
 	},
+	statePassword: {
+		title: "Account Password",
+		description: `Set the login password for your user
+account.
+
+This password will be used for:
+• Logging into the system
+• sudo commands (admin access)
+• Screen unlock
+
+Requirements:
+• At least 8 characters
+• Use a strong, memorable password
+• You will be prompted to confirm it`,
+		stepNum: 4,
+	},
+	statePasswordConfirm: {
+		title: "Confirm Password",
+		description: `Please re-enter your account password
+to confirm.
+
+Make sure you remember this password.
+You will need it to log in after
+installation.`,
+		stepNum: 5,
+	},
 	stateHostname: {
 		title: "Machine Name",
 		description: `Choose a hostname for this computer.
@@ -213,7 +241,7 @@ Good examples:
 
 Keep it short, memorable, and lowercase.
 Use only letters, numbers, and hyphens.`,
-		stepNum: 4,
+		stepNum: 6,
 	},
 	stateDisk: {
 		title: "Target Disk",
@@ -232,7 +260,7 @@ ZFS datasets created:
 • NIXROOT/root - System root
 • NIXROOT/nix  - Nix store
 • NIXROOT/home - User data`,
-		stepNum: 5,
+		stepNum: 7,
 	},
 	statePassphrase: {
 		title: "ZFS Encryption Passphrase",
@@ -251,7 +279,7 @@ Requirements:
 
 If you forget this passphrase, your
 data cannot be recovered.`,
-		stepNum: 6,
+		stepNum: 8,
 	},
 	statePassphraseConfirm: {
 		title: "Confirm Passphrase",
@@ -260,7 +288,7 @@ passphrase to confirm.
 
 Make sure you remember this passphrase.
 You will need it every time you boot.`,
-		stepNum: 7,
+		stepNum: 9,
 	},
 	stateLocale: {
 		title: "System Locale",
@@ -274,7 +302,7 @@ This configures:
 
 The locale affects terminal output,
 file sorting, and application behavior.`,
-		stepNum: 8,
+		stepNum: 10,
 	},
 	stateKeymap: {
 		title: "Keyboard Layout",
@@ -289,7 +317,7 @@ Common layouts:
 • uk - UK English
 • de - German (QWERTZ)
 • fr - French (AZERTY)`,
-		stepNum: 9,
+		stepNum: 11,
 	},
 	stateSummary: {
 		title: "Review Configuration",
@@ -305,7 +333,7 @@ After confirmation, the installer will:
 This process takes 10-30 minutes
 depending on your hardware and
 internet connection speed.`,
-		stepNum: 10,
+		stepNum: 12,
 	},
 	stateConfirm: {
 		title: "Final Confirmation",
@@ -318,17 +346,18 @@ This action cannot be undone.
 
 To proceed, type DESTROY exactly.
 To cancel, press Ctrl+C or q.`,
-		stepNum: 11,
+		stepNum: 13,
 	},
 }
 
-const totalSteps = 11
+const totalSteps = 13
 
 // Config holds all installation configuration
 type Config struct {
 	Username    string
 	Fullname    string
 	Email       string
+	Password    string
 	Hostname    string
 	Disk        string
 	HostID      string
@@ -587,7 +616,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// Update text input for input states
 	if m.state == stateUsername || m.state == stateFullname ||
-		m.state == stateEmail || m.state == stateHostname ||
+		m.state == stateEmail || m.state == statePassword || m.state == statePasswordConfirm ||
+		m.state == stateHostname ||
 		m.state == statePassphrase || m.state == statePassphraseConfirm ||
 		m.state == stateConfirm {
 		m.input, cmd = m.input.Update(msg)
@@ -716,8 +746,36 @@ func (m model) handleEnter() (tea.Model, tea.Cmd) {
 		}
 		m.config.Email = val
 		m.err = nil
+		m.state = statePassword
+		m.input.SetValue("")
+		m.input.Placeholder = "Enter account password"
+		m.input.EchoMode = textinput.EchoPassword
+		m.input.EchoCharacter = '*'
+
+	case statePassword:
+		val := m.input.Value()
+		if len(val) < 8 {
+			m.err = fmt.Errorf("password must be at least 8 characters")
+			return m, nil
+		}
+		m.config.Password = val
+		m.err = nil
+		m.state = statePasswordConfirm
+		m.input.SetValue("")
+		m.input.Placeholder = "Re-enter password to confirm"
+
+	case statePasswordConfirm:
+		val := m.input.Value()
+		if val != m.config.Password {
+			m.err = fmt.Errorf("passwords do not match")
+			m.input.SetValue("")
+			return m, nil
+		}
+		m.err = nil
 		m.state = stateHostname
 		m.input.SetValue("")
+		m.input.EchoMode = textinput.EchoNormal
+		m.input.EchoCharacter = 0
 		m.input.Placeholder = "e.g., laptop, desktop, server"
 
 	case stateHostname:
@@ -909,7 +967,7 @@ func (m model) viewWizard() string {
 
 	// Left column: title and description
 	titleText := titleStyle.Width(leftWidth).Render(step.title)
-	descText := detailStyle.Width(leftWidth).Render(step.description)
+	descText := lipgloss.NewStyle().Foreground(colorOffWhite).Width(leftWidth).Render(step.description)
 	leftContent := lipgloss.JoinVertical(lipgloss.Left,
 		titleText,
 		"",
@@ -954,7 +1012,7 @@ func (m model) renderRightPanel(stepNum int) string {
 	var content string
 
 	switch m.state {
-	case stateUsername, stateFullname, stateEmail, stateHostname, statePassphrase, statePassphraseConfirm, stateConfirm:
+	case stateUsername, stateFullname, stateEmail, statePassword, statePasswordConfirm, stateHostname, statePassphrase, statePassphraseConfirm, stateConfirm:
 		inputBox := lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
 			BorderForeground(colorNixBlue).
@@ -973,7 +1031,7 @@ func (m model) renderRightPanel(stepNum int) string {
 		var diskList strings.Builder
 		for i, disk := range m.disks {
 			cursor := "  "
-			style := lipgloss.NewStyle().Foreground(colorWhite)
+			style := lipgloss.NewStyle().Foreground(colorOffWhite)
 			if i == m.selectedIdx {
 				cursor = "> "
 				style = style.Foreground(colorOrange).Bold(true)
@@ -995,7 +1053,7 @@ func (m model) renderRightPanel(stepNum int) string {
 		var optList strings.Builder
 		for i, opt := range m.locales {
 			cursor := "  "
-			style := lipgloss.NewStyle().Foreground(colorWhite)
+			style := lipgloss.NewStyle().Foreground(colorOffWhite)
 			if i == m.selectedIdx {
 				cursor = "> "
 				style = style.Foreground(colorOrange).Bold(true)
@@ -1010,7 +1068,7 @@ func (m model) renderRightPanel(stepNum int) string {
 		var optList strings.Builder
 		for i, opt := range m.keymaps {
 			cursor := "  "
-			style := lipgloss.NewStyle().Foreground(colorWhite)
+			style := lipgloss.NewStyle().Foreground(colorOffWhite)
 			if i == m.selectedIdx {
 				cursor = "> "
 				style = style.Foreground(colorOrange).Bold(true)
@@ -1022,20 +1080,21 @@ func (m model) renderRightPanel(stepNum int) string {
 		content = optList.String() + hint
 
 	case stateSummary:
+		infoStyle := lipgloss.NewStyle().Foreground(colorOffWhite)
 		content = promptStyle.Render("User Account") + "\n" +
-			successStyle.Render(fmt.Sprintf("  Username:  %s", m.config.Username)) + "\n" +
-			detailStyle.Render(fmt.Sprintf("  Full name: %s", m.config.Fullname)) + "\n" +
-			detailStyle.Render(fmt.Sprintf("  Email:     %s", m.config.Email)) + "\n\n" +
+			infoStyle.Render(fmt.Sprintf("  Username:  %s", m.config.Username)) + "\n" +
+			infoStyle.Render(fmt.Sprintf("  Full name: %s", m.config.Fullname)) + "\n" +
+			infoStyle.Render(fmt.Sprintf("  Email:     %s", m.config.Email)) + "\n\n" +
 			promptStyle.Render("System") + "\n" +
-			detailStyle.Render(fmt.Sprintf("  Hostname:  %s", m.config.Hostname)) + "\n" +
-			detailStyle.Render(fmt.Sprintf("  Disk:      %s", m.config.Disk)) + "\n" +
-			detailStyle.Render(fmt.Sprintf("  Host ID:   %s", m.config.HostID)) + "\n" +
-			detailStyle.Render(fmt.Sprintf("  Locale:    %s", m.config.Locale)) + "\n" +
-			detailStyle.Render(fmt.Sprintf("  Keyboard:  %s", m.config.Keymap)) + "\n\n" +
+			infoStyle.Render(fmt.Sprintf("  Hostname:  %s", m.config.Hostname)) + "\n" +
+			infoStyle.Render(fmt.Sprintf("  Disk:      %s", m.config.Disk)) + "\n" +
+			infoStyle.Render(fmt.Sprintf("  Host ID:   %s", m.config.HostID)) + "\n" +
+			infoStyle.Render(fmt.Sprintf("  Locale:    %s", m.config.Locale)) + "\n" +
+			infoStyle.Render(fmt.Sprintf("  Keyboard:  %s", m.config.Keymap)) + "\n\n" +
 			promptStyle.Render("Disk Allocation") + "\n" +
-			detailStyle.Render(fmt.Sprintf("  /boot:      %s", m.config.SpaceBoot)) + "\n" +
-			detailStyle.Render(fmt.Sprintf("  /nix:       %s", m.config.SpaceNix)) + "\n" +
-			detailStyle.Render(fmt.Sprintf("  /home:      %s", m.config.SpaceHome)) + "\n\n" +
+			infoStyle.Render(fmt.Sprintf("  /boot:      %s", m.config.SpaceBoot)) + "\n" +
+			infoStyle.Render(fmt.Sprintf("  /nix:       %s", m.config.SpaceNix)) + "\n" +
+			infoStyle.Render(fmt.Sprintf("  /home:      %s", m.config.SpaceHome)) + "\n\n" +
 			grayStyle.Render("Enter to proceed | Ctrl+C to cancel")
 	}
 
@@ -1196,6 +1255,8 @@ func (m model) viewInstalling() string {
 		"Finalizing ZFS pool",
 	}
 
+	pendingStyle := lipgloss.NewStyle().Foreground(colorDimGray)
+	activeStyle := lipgloss.NewStyle().Foreground(colorOffWhite).Bold(true)
 	var stepList strings.Builder
 	for i, step := range steps {
 		var icon, text string
@@ -1205,11 +1266,11 @@ func (m model) viewInstalling() string {
 		} else if i == m.installStep {
 			spinChars := []string{"|", "/", "-", "\\"}
 			spin := spinChars[m.animTick%len(spinChars)]
-			icon = warningStyle.Render("[" + spin + "] ")
-			text = warningStyle.Render(step + "...")
+			icon = activeStyle.Render("[" + spin + "] ")
+			text = activeStyle.Render(step + "...")
 		} else {
-			icon = grayStyle.Render("[ ] ")
-			text = grayStyle.Render(step)
+			icon = pendingStyle.Render("[ ] ")
+			text = pendingStyle.Render(step)
 		}
 		stepList.WriteString(icon + text + "\n")
 	}
@@ -1253,21 +1314,21 @@ func (m model) viewComplete() string {
 		Width(m.width - 4).
 		Render("Installation Complete!")
 
+	completeInfoStyle := lipgloss.NewStyle().Foreground(colorOffWhite)
 	info := lipgloss.JoinVertical(lipgloss.Left,
-		promptStyle.Render("Your tuinix system is ready!"),
+		completeInfoStyle.Render("Your tuinix system is ready!"),
 		"",
-		detailStyle.Render("Login credentials:"),
-		successStyle.Render(fmt.Sprintf("  Username: %s", m.config.Username)),
-		warningStyle.Render("  Password: changeme"),
-		errorStyle.Render("  ! Change immediately after first login!"),
+		completeInfoStyle.Render("Login credentials:"),
+		completeInfoStyle.Render(fmt.Sprintf("  Username: %s", m.config.Username)),
+		completeInfoStyle.Render("  Password: (the one you set during install)"),
 		"",
-		detailStyle.Render("Your flake is at:"),
-		successStyle.Render(fmt.Sprintf("  /home/%s/tuinix", m.config.Username)),
+		completeInfoStyle.Render("Your flake is at:"),
+		completeInfoStyle.Render(fmt.Sprintf("  /home/%s/tuinix", m.config.Username)),
 		"",
-		detailStyle.Render("Rebuild command:"),
-		grayStyle.Render(fmt.Sprintf("  sudo nixos-rebuild switch --flake .#%s", m.config.Hostname)),
+		completeInfoStyle.Render("Rebuild command:"),
+		completeInfoStyle.Render(fmt.Sprintf("  sudo nixos-rebuild switch --flake .#%s", m.config.Hostname)),
 		"",
-		successStyle.Render("[done] Git is pre-configured with your identity"),
+		successStyle.Render("Git is pre-configured with your identity"),
 	)
 
 	reboot := promptStyle.Copy().
@@ -1314,12 +1375,13 @@ func (m model) viewError() string {
 		errMsg = m.installErr.Error()
 	}
 
+	errInfoStyle := lipgloss.NewStyle().Foreground(colorOffWhite)
 	info := lipgloss.JoinVertical(lipgloss.Left,
-		errorStyle.Render("An error occurred during installation:"),
+		errInfoStyle.Render("An error occurred during installation:"),
 		"",
-		detailStyle.Render(errMsg),
+		errorStyle.Render(errMsg),
 		"",
-		warningStyle.Render("Please check the error message above."),
+		errInfoStyle.Bold(true).Render("Please check the error message above."),
 		grayStyle.Render("You may need to reboot and try again."),
 	)
 
@@ -1374,6 +1436,20 @@ func isValidHostname(s string) bool {
 
 func generateHostID() string {
 	return fmt.Sprintf("%08x", uint32(time.Now().UnixNano())&0xFFFFFFFF)
+}
+
+// hashPassword generates a SHA-512 crypt hash using mkpasswd
+func hashPassword(password string) (string, error) {
+	cmd := exec.Command("mkpasswd", "-m", "sha-512", "--stdin")
+	cmd.Stdin = strings.NewReader(password)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	if err := cmd.Run(); err != nil {
+		logError("mkpasswd failed: %v, stderr: %s", err, stderr.String())
+		return "", fmt.Errorf("mkpasswd failed: %w", err)
+	}
+	return strings.TrimSpace(stdout.String()), nil
 }
 
 func getAvailableDisks() []diskInfo {
@@ -1581,6 +1657,14 @@ func generateHostConfig(c Config) error {
 	usersDir := filepath.Join(workDir, "users")
 	logInfo("generateHostConfig: usersDir is %s", usersDir)
 
+	// Hash the user password
+	logInfo("generateHostConfig: hashing user password")
+	hashedPassword, err := hashPassword(c.Password)
+	if err != nil {
+		return fmt.Errorf("hash password: %w", err)
+	}
+	logInfo("generateHostConfig: password hashed successfully")
+
 	userNix := fmt.Sprintf(`# User configuration for %s
 # Generated by tuinix installer on %s
 { config, lib, pkgs, ... }:
@@ -1592,7 +1676,7 @@ func generateHostConfig(c Config) error {
     extraGroups = [ "wheel" "networkmanager" "audio" "video" "docker" ];
     home = "/home/%s";
     createHome = true;
-    initialPassword = "changeme";
+    hashedPassword = "%s";
   };
 
   home-manager.users.%s = { pkgs, ... }: {
@@ -1610,7 +1694,7 @@ func generateHostConfig(c Config) error {
   };
 }
 `, c.Username, time.Now().UTC().Format("2006-01-02 15:04:05 UTC"),
-		c.Username, c.Fullname, c.Username,
+		c.Username, c.Fullname, c.Username, hashedPassword,
 		c.Username,
 		c.Fullname, c.Email)
 

@@ -9,8 +9,7 @@ After installation and reboot:
 1. GRUB loads automatically
 2. You'll be prompted for your ZFS encryption passphrase
 3. The system boots to a terminal login prompt
-4. Log in with the username you created during installation (default password: `changeme`)
-5. **Change your password immediately**: `passwd`
+4. Log in with the username and password you set during installation
 
 ## Your environment
 

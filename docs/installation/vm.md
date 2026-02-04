@@ -28,7 +28,7 @@ serial numbers, and resource allocation automatically:
 
 # 2. Boot the ISO in a VM and run the TUI installer
 ./scripts/run-vm.sh iso
-# Inside VM: sudo tuinix-installer
+# Inside VM: sudo installer
 
 # 3. After installation completes, boot from the installed disk
 ./scripts/run-vm.sh harddrive
@@ -96,7 +96,7 @@ ensure they're in `boot.initrd.availableKernelModules`.
 2. **System > Motherboard**: check "Enable EFI"
 3. Allocate at least 4 GB RAM and 20 GB disk
 4. Attach the ISO as a CD/DVD
-5. Boot and run `sudo tuinix-installer`
+5. Boot and run `sudo installer`
 
 !!! note
     VirtualBox EFI support can be unreliable. QEMU/KVM (option A or B) is strongly recommended.
