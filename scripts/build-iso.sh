@@ -139,7 +139,14 @@ gum style --foreground="#0066cc" "📋 Generating build information..."
 if [[ -x "$PROJECT_ROOT/scripts/build-version.sh" ]]; then
   cd "$PROJECT_ROOT"
   scripts/build-version.sh
-  gum style --foreground="#00cc00" "  ✅ Build information generated"
+  # Auto-commit build-info.txt so the git tree is clean for nix flake evaluation.
+  # A dirty tree causes nix to produce a broken/truncated ISO.
+  if git diff --quiet build-info.txt 2>/dev/null; then
+    gum style --foreground="#00cc00" "  ✅ Build information unchanged"
+  else
+    git add build-info.txt && git commit -m "Update build-info for $VERSION" --quiet
+    gum style --foreground="#00cc00" "  ✅ Build information generated and committed"
+  fi
 else
   gum style --foreground="#ff0000" "  ❌ Build version script not found or not executable"
   exit 1
