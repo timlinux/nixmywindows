@@ -837,3 +837,4 @@ Changes made:
 - modules/system/boot.nix: Conditional zfsSupport and kernel selection (latest kernel for XFS, ZFS-compatible for ZFS)
 - installer.nix: Added xfsprogs to ISO packages
 - docs/installation/bare-metal.md: Full documentation of all 5 storage modes, disk layouts, recovery procedures
+2026-02-04T23:36:06+00:00 - User request: Add an option to the installer where the user can choose to enable SSH. If the user opts in for SSH, ask them for a GitHub username, fetch the public key for that user and add it to the authorized keys list, enforce key-based authentication and disable password-based auth.

@@ -86,3 +86,6 @@ site/
 # Build artifacts
 cmd/installer/tuinix-installer
 iso-inventory.txt
+
+# Claude settings
+.claude/settings.local.json
