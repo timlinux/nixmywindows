@@ -60,6 +60,76 @@ runs `nixos-rebuild switch` with your local flake and optionally cleans
 up old generations and runs garbage collection afterwards. It also
 accepts `boot` or `test` as an argument instead of the default `switch`.
 
+## Adding packages
+
+tuinix uses NixOS's declarative package management. You can add packages
+either to your user configuration (available only to you) or to the system
+configuration (available to all users).
+
+### Finding packages
+
+Search for available packages at [search.nixos.org/packages](https://search.nixos.org/packages).
+Enter a package name or description to find what you need.
+
+### User packages
+
+Edit your user configuration file to add packages specific to your account:
+
+```bash
+cd ~/tuinix
+vim users/user.nix
+```
+
+Find the `packages` section and add your desired packages:
+
+```nix
+# User-specific packages
+packages = with pkgs; [
+  # Example: eza - a modern replacement for ls
+  eza
+
+  # Add your packages below:
+  htop
+  ripgrep
+  fzf
+];
+```
+
+Then rebuild and commit:
+
+```bash
+./scripts/rebuild.sh
+git add -A && git commit -m "Add user packages"
+```
+
+### Example: Installing eza
+
+[eza](https://eza.rocks/) is a modern, colorful replacement for `ls`. To install it:
+
+1. Edit `users/user.nix`:
+   ```nix
+   packages = with pkgs; [
+     eza
+   ];
+   ```
+
+2. Rebuild your system:
+   ```bash
+   ./scripts/rebuild.sh
+   ```
+
+3. Use eza:
+   ```bash
+   eza -la          # List all files with details
+   eza --tree       # Tree view
+   eza --icons      # With file type icons
+   ```
+
+4. Commit your change:
+   ```bash
+   git add -A && git commit -m "Add eza"
+   ```
+
 ### Pulling upstream updates
 
 ```bash
