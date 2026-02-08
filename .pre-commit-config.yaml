@@ -4,9 +4,9 @@ repos:
     rev: v4.5.0
     hooks:
       - id: trailing-whitespace
-        exclude: ^.*vendor/
+        exclude: (^.*vendor/|PROMPT\.log$|\.txt$)
       - id: end-of-file-fixer
-        exclude: ^.*vendor/
+        exclude: (^.*vendor/|PROMPT\.log$|\.txt$)
       - id: check-yaml
         args: [--unsafe]
       - id: check-added-large-files
@@ -87,21 +87,17 @@ repos:
     hooks:
       - id: mypy
 
-  # Go formatting and linting
-  - repo: https://github.com/dnephin/pre-commit-golang
-    rev: v0.5.1
-    hooks:
-      - id: go-fmt
-        exclude: ^.*vendor/
-      - id: go-imports
-        exclude: ^.*vendor/
-      - id: go-cyclo
-        args: [-over=15]
-        exclude: ^.*vendor/
-      - id: go-mod-tidy
-        exclude: ^.*vendor/
-      - id: golangci-lint
-        exclude: ^.*vendor/
+  # Go formatting and linting - disabled as there's a separate Go Quality CI job
+  # that properly handles Go linting without requiring all tools to be pre-installed
+  # - repo: https://github.com/dnephin/pre-commit-golang
+  #   rev: v0.5.1
+  #   hooks:
+  #     - id: go-fmt
+  #     - id: go-imports
+  #     - id: go-cyclo
+  #       args: [-over=15]
+  #     - id: go-mod-tidy
+  #     - id: golangci-lint
 
   # Security scanning
   - repo: https://github.com/Yelp/detect-secrets
