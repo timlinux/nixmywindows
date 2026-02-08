@@ -61,6 +61,7 @@ repos:
     hooks:
       - id: prettier
         files: \.(css|scss|less)$
+        exclude: ^.*vendor/
 
   # Python formatting and linting
   - repo: https://github.com/psf/black
@@ -91,11 +92,16 @@ repos:
     rev: v0.5.1
     hooks:
       - id: go-fmt
+        exclude: ^.*vendor/
       - id: go-imports
+        exclude: ^.*vendor/
       - id: go-cyclo
         args: [-over=15]
+        exclude: ^.*vendor/
       - id: go-mod-tidy
+        exclude: ^.*vendor/
       - id: golangci-lint
+        exclude: ^.*vendor/
 
   # Security scanning
   - repo: https://github.com/Yelp/detect-secrets
@@ -103,6 +109,7 @@ repos:
     hooks:
       - id: detect-secrets
         args: ["--baseline", ".secrets.baseline"]
+        exclude: ^.*vendor/
 
   # Commit message validation
   - repo: https://github.com/commitizen-tools/commitizen
@@ -117,7 +124,7 @@ repos:
     hooks:
       - id: prettier
         files: \.(yaml|yml)$
-        exclude: ^mkdocs\.yml$
+        exclude: (^mkdocs\.yml$|^.*vendor/)
 
   # JSON formatting
   - repo: https://github.com/pre-commit/mirrors-prettier
@@ -125,3 +132,4 @@ repos:
     hooks:
       - id: prettier
         files: \.json$
+        exclude: ^.*vendor/
