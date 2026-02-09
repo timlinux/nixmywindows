@@ -4,7 +4,9 @@ repos:
     rev: v4.5.0
     hooks:
       - id: trailing-whitespace
+        exclude: (^.*vendor/|PROMPT\.log$|\.txt$)
       - id: end-of-file-fixer
+        exclude: (^.*vendor/|PROMPT\.log$|\.txt$)
       - id: check-yaml
         args: [--unsafe]
       - id: check-added-large-files
@@ -30,7 +32,7 @@ repos:
     hooks:
       - id: shellcheck
         args: [--severity=warning]
-        exclude: ^\.envrc$
+        exclude: (^\.envrc$|^.*vendor/)
 
   # Bash formatting
   - repo: https://github.com/lovesegfault/beautysh
@@ -38,13 +40,14 @@ repos:
     hooks:
       - id: beautysh
         args: [--indent-size=2]
-        exclude: ^\.envrc$
+        exclude: (^\.envrc$|^.*vendor/)
 
   # Markdown linting and formatting
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.37.0
     hooks:
       - id: markdownlint
+        exclude: ^.*vendor/
 
   # HTML validation
   - repo: https://github.com/Riverside-Healthcare/djLint
@@ -58,6 +61,7 @@ repos:
     hooks:
       - id: prettier
         files: \.(css|scss|less)$
+        exclude: ^.*vendor/
 
   # Python formatting and linting
   - repo: https://github.com/psf/black
@@ -83,16 +87,17 @@ repos:
     hooks:
       - id: mypy
 
-  # Go formatting and linting
-  - repo: https://github.com/dnephin/pre-commit-golang
-    rev: v0.5.1
-    hooks:
-      - id: go-fmt
-      - id: go-imports
-      - id: go-cyclo
-        args: [-over=15]
-      - id: go-mod-tidy
-      - id: golangci-lint
+  # Go formatting and linting - disabled as there's a separate Go Quality CI job
+  # that properly handles Go linting without requiring all tools to be pre-installed
+  # - repo: https://github.com/dnephin/pre-commit-golang
+  #   rev: v0.5.1
+  #   hooks:
+  #     - id: go-fmt
+  #     - id: go-imports
+  #     - id: go-cyclo
+  #       args: [-over=15]
+  #     - id: go-mod-tidy
+  #     - id: golangci-lint
 
   # Security scanning
   - repo: https://github.com/Yelp/detect-secrets
@@ -100,6 +105,7 @@ repos:
     hooks:
       - id: detect-secrets
         args: ["--baseline", ".secrets.baseline"]
+        exclude: ^.*vendor/
 
   # Commit message validation
   - repo: https://github.com/commitizen-tools/commitizen
@@ -114,7 +120,7 @@ repos:
     hooks:
       - id: prettier
         files: \.(yaml|yml)$
-        exclude: ^mkdocs\.yml$
+        exclude: (^mkdocs\.yml$|^.*vendor/)
 
   # JSON formatting
   - repo: https://github.com/pre-commit/mirrors-prettier
@@ -122,3 +128,4 @@ repos:
     hooks:
       - id: prettier
         files: \.json$
+        exclude: ^.*vendor/

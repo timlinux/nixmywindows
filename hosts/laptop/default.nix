@@ -11,5 +11,8 @@
   # Enable iPhone USB tethering support
   tuinix.networking.iphone-tethering.enable = true;
 
+  # Enable ZFS support (required for ZFS root filesystem)
+  tuinix.zfs.enable = true;
+
   system.stateVersion = "25.11";
 }

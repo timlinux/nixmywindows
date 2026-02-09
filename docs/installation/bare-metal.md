@@ -73,7 +73,8 @@ Before booting from USB, enter your BIOS/UEFI settings (typically by pressing F2
 
 ## Network connectivity
 
-The installer requires an internet connection to download packages. Here are several options for getting online from the live environment:
+The installer requires an internet connection to download packages. Here are several options for
+getting online from the live environment:
 
 ### Ethernet (automatic)
 
@@ -115,7 +116,8 @@ sudo installer
 
 The interactive TUI installer will guide you through:
 
-1. **Network check** -- the installer verifies internet connectivity (required for fetching packages). If no connection is detected, you'll be prompted to configure networking and retry.
+1. **Network check** -- the installer verifies internet connectivity (required for fetching packages).
+   If no connection is detected, you'll be prompted to configure networking and retry.
 2. **Username** -- enter your login username
 3. **Full name** -- your display name (used in git config)
 4. **Email** -- your email address (used in git config)
@@ -125,9 +127,11 @@ The interactive TUI installer will guide you through:
 8. **Disk selection** -- choose the target disk(s)
 9. **ZFS encryption passphrase** -- set a passphrase for full-disk encryption (skipped for XFS mode)
 10. **Locale and keyboard** -- select your region and layout
-11. **SSH server** -- choose whether to enable the OpenSSH server on the installed system (see [SSH Server](#ssh-server) below)
+11. **SSH server** -- choose whether to enable the OpenSSH server on the installed system
+    (see [SSH Server](#ssh-server) below)
 12. **Confirmation** -- review the summary, type `DESTROY` to confirm
-13. **Installation** -- partitioning, formatting, and NixOS install run automatically. A live log tail is displayed so you can monitor progress.
+13. **Installation** -- partitioning, formatting, and NixOS install run automatically.
+    A live log tail is displayed so you can monitor progress.
 
 ## Storage Modes
 
@@ -176,9 +180,11 @@ The installer optionally configures SSH access on the installed system. When ena
 - The firewall is enabled with port 22 open
 - Password authentication is disabled for security
 - Root login via password is prohibited (key-based only)
-- You will be prompted for a GitHub username so the installer can fetch your public SSH keys and add them to your authorized keys
+- You will be prompted for a GitHub username so the installer can fetch your public SSH keys
+  and add them to your authorized keys
 
-This is recommended for servers and headless machines. If you skip SSH during installation, you can enable it later by adding the following to your host configuration:
+This is recommended for servers and headless machines. If you skip SSH during installation, you can
+enable it later by adding the following to your host configuration:
 
 ```nix
 tuinix.security.ssh.enable = true;
