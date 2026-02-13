@@ -232,11 +232,18 @@ func generateHostConfig(c Config) error {
   environment.systemPackages = with pkgs; [
     vim
     git
+    curl
+    wget
+    htop
+    tree
   ];
 
 %s
 %s
   boot.consoleLogLevel = 3;
+
+  # Enable NetworkManager for network management (provides nmtui)
+  tuinix.networking.networkmanager.enable = true;
 
   # Enable iPhone USB tethering support
   tuinix.networking.iphone-tethering.enable = true;

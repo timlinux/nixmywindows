@@ -32,6 +32,44 @@ let
 in {
   imports = [ (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix") ];
 
+  # Include system build dependencies for offline installation
+  # This adds packages needed for a basic tuinix installation without network
+  isoImage.storeContents = with pkgs; [
+    # Core system packages that will be installed
+    networkmanager
+    vim
+    git
+    curl
+    wget
+    htop
+    tree
+    # iPhone tethering
+    libimobiledevice
+    ifuse
+    usbmuxd
+    # Boot and filesystem tools
+    grub2
+    efibootmgr
+    # Kernel and firmware - essential for any install
+    linuxPackages.kernel
+    linux-firmware
+    # System utilities
+    systemd
+    dbus
+    pam
+    shadow
+    util-linux
+    coreutils
+    bash
+    # Nix itself for the installed system
+    nix
+    # Home-manager for user configuration
+    home-manager
+  ];
+
+  # Include build dependencies so offline rebuilds work better
+  system.includeBuildDependencies = true;
+
   # Include flake files and assets on the ISO
   isoImage.contents = [
     {
