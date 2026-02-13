@@ -2,11 +2,18 @@
 
 This guide covers installing tuinix on a real physical machine.
 
+## Supported Architectures
+
+| Architecture | ISO | Target Devices |
+|--------------|-----|----------------|
+| x86_64 | `tuinix.VERSION.x86_64.iso` | Standard PCs, laptops, servers |
+| aarch64 | `tuinix.VERSION.aarch64.iso` | ARM64 devices with UEFI boot |
+
 ## Hardware Requirements
 
 | Resource | Minimum | Recommended |
 |----------|---------|-------------|
-| CPU | x86_64 | Modern x86_64 (AMD Ryzen / Intel Core) |
+| CPU | x86_64 or aarch64 | Modern multi-core (AMD Ryzen / Intel Core / ARM64) |
 | RAM | 4 GB | 8 GB+ |
 | Storage | 20 GB | 50 GB+ (SSD strongly recommended) |
 | Boot mode | UEFI | UEFI |
@@ -25,11 +32,22 @@ or build it yourself:
 ```bash
 git clone https://github.com/timlinux/tuinix.git
 cd tuinix
+
+# Build for x86_64 (default)
 ./scripts/build-iso.sh
+
+# Build for aarch64 (ARM64)
+./scripts/build-iso.sh aarch64
+
+# Build both architectures
+./scripts/build-iso.sh both
 ```
 
-The ISO includes the installer and system configuration. An internet
-connection is required during installation to fetch packages.
+!!! success "Fully Offline Installation"
+    The tuinix ISO includes the complete system closure - all packages
+    required for installation are pre-cached. No internet connection is
+    needed for standard configurations. This is ideal for air-gapped
+    environments or locations with poor connectivity.
 
 ## Step 2: Flash the ISO to a USB drive
 
@@ -71,10 +89,14 @@ Before booting from USB, enter your BIOS/UEFI settings (typically by pressing F2
 !!! tip
     Many machines have a one-time boot menu (often F12) that lets you select the USB without changing permanent settings.
 
-## Network connectivity
+## Network connectivity (optional)
 
-The installer requires an internet connection to download packages. Here are several options for
-getting online from the live environment:
+Since the tuinix ISO includes all packages for offline installation, network
+connectivity is **optional** for standard configurations. However, if your
+configuration adds packages beyond the standard set, or you want to pull
+the latest updates, an internet connection may be useful.
+
+Here are several options for getting online from the live environment:
 
 ### Ethernet (automatic)
 
@@ -116,8 +138,8 @@ sudo installer
 
 The interactive TUI installer will guide you through:
 
-1. **Network check** -- the installer verifies internet connectivity (required for fetching packages).
-   If no connection is detected, you'll be prompted to configure networking and retry.
+1. **Network check** -- the installer checks internet connectivity. This can be skipped for
+   offline installations since all packages are pre-cached on the ISO.
 2. **Username** -- enter your login username
 3. **Full name** -- your display name (used in git config)
 4. **Email** -- your email address (used in git config)
@@ -248,6 +270,28 @@ The pool mode determines redundancy:
 
 ZFS datasets are the same as the single-disk encrypted ZFS layout.
 
+## Default Packages
+
+Every tuinix installation includes these packages out of the box:
+
+**Networking:**
+
+- NetworkManager with `nmtui` for easy WiFi/network configuration
+- iPhone USB tethering support (libimobiledevice, usbmuxd, ifuse)
+
+**Core Tools:**
+
+- vim, git, curl, wget, htop, tree
+
+**ZFS Features (x86_64 only):**
+
+- Full ZFS support with encryption, compression, and snapshots
+- Native ZFS kernel modules
+
+!!! note "Architecture Differences"
+    ZFS is only available on x86_64 installations. On aarch64, the XFS
+    storage mode is used instead for maximum compatibility.
+
 ## Post-installation
 
 After installation, the flake is copied to two locations:
@@ -333,3 +377,9 @@ If your system won't boot:
 | "no such pool available" | Disk has no `/dev/disk/by-id/` entry | Rare on real hardware; check disk WWN with `ls -la /dev/disk/by-id/` |
 | Installation fails | Not enough disk space | Need at least 20 GB free |
 | Can't type passphrase | Wrong keyboard layout in initrd | Reinstall with correct keyboard layout |
+| "path not found" during offline install | Custom packages not in ISO closure | Connect to internet or rebuild ISO with custom packages |
+
+!!! tip "Offline Installation Notes"
+    The ISO includes all standard tuinix packages. If you modify the
+    configuration to add packages not in the standard set, you may need
+    an internet connection or to rebuild the ISO with your custom closure.
