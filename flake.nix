@@ -172,30 +172,104 @@
     }) // {
 
       # NixOS configurations (dynamically generated)
-      nixosConfigurations =
+      nixosConfigurations = let
+        # Build a reference system configuration for offline installation
+        # This config represents the "base" system that will be installed
+        mkReferenceConfig = system:
+          nixpkgs.lib.nixosSystem {
+            inherit system;
+            specialArgs = {
+              inherit inputs;
+              hostname = "offline-reference";
+              inherit (nixpkgs) lib;
+            };
+            modules = [
+              disko.nixosModules.disko
+              home-manager.nixosModules.home-manager
+              ./modules
+              # Minimal reference configuration with all features enabled
+              ({ config, lib, pkgs, ... }: {
+                # Enable all the features we want available offline
+                tuinix.networking.networkmanager.enable = true;
+                tuinix.networking.iphone-tethering.enable = true;
+                tuinix.zfs.enable = lib.mkIf (system == "x86_64-linux") true;
+
+                # Basic system config
+                networking.hostName = "offline-reference";
+                networking.hostId = "00000000";
+                system.stateVersion = "25.11";
+
+                # Include a basic user for the closure
+                users.users.user = {
+                  isNormalUser = true;
+                  extraGroups = [ "wheel" "networkmanager" ];
+                };
+
+                # Home-manager config
+                home-manager.users.user = { pkgs, ... }: {
+                  home.stateVersion = "24.11";
+                };
+
+                # Boot configuration - use GRUB for broader compatibility
+                boot.loader.grub.enable = true;
+                boot.loader.grub.device = "nodev";
+                boot.loader.grub.efiSupport = true;
+                boot.loader.grub.efiInstallAsRemovable = true;
+
+                # Essential packages
+                environment.systemPackages = with pkgs; [
+                  vim
+                  git
+                  curl
+                  wget
+                  htop
+                  tree
+                ];
+
+                # Filesystem placeholder (disko requires this)
+                fileSystems."/" = {
+                  device = "/dev/disk/by-label/nixos";
+                  fsType = "ext4";
+                };
+                fileSystems."/boot" = {
+                  device = "/dev/disk/by-label/boot";
+                  fsType = "vfat";
+                };
+              })
+            ];
+          };
+
+        # Reference configs for each architecture
+        referenceX86 = mkReferenceConfig "x86_64-linux";
+        referenceAarch64 = mkReferenceConfig "aarch64-linux";
+      in
         # Regular host configurations
         (mkHostConfigs [ ]) //
 
         # ISO configurations for installation
         {
-          # x86_64 installer
+          # x86_64 installer with offline support
           "installer" = nixpkgs.lib.nixosSystem {
             system = "x86_64-linux";
             specialArgs = {
               inherit inputs;
               hostname = "nixos";
               inherit (nixpkgs) lib;
+              # Pass the reference system's toplevel for offline installation
+              offlineSystemClosure = referenceX86.config.system.build.toplevel;
             };
             modules = [ (import ./installer.nix { system = "x86_64-linux"; }) ];
           };
 
-          # aarch64 installer (for R36S and ARM devices)
+          # aarch64 installer with offline support
           "installer-aarch64" = nixpkgs.lib.nixosSystem {
             system = "aarch64-linux";
             specialArgs = {
               inherit inputs;
               hostname = "nixos";
               inherit (nixpkgs) lib;
+              # Pass the reference system's toplevel for offline installation
+              offlineSystemClosure = referenceAarch64.config.system.build.toplevel;
             };
             modules =
               [ (import ./installer.nix { system = "aarch64-linux"; }) ];

@@ -1,7 +1,7 @@
 # tuinix installer ISO configuration
 # This is a curried module: first call with { system } to get the actual module
 { system ? "x86_64-linux" }:
-{ config, lib, pkgs, modulesPath, ... }:
+{ config, lib, pkgs, modulesPath, offlineSystemClosure ? null, ... }:
 
 let
   # Get version info from build-info.txt or use defaults
@@ -32,10 +32,13 @@ let
 in {
   imports = [ (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix") ];
 
-  # Include system build dependencies for offline installation
-  # This adds packages needed for a basic tuinix installation without network
-  isoImage.storeContents = with pkgs; [
-    # Core system packages that will be installed
+  # Include the complete system closure for fully offline installation
+  # The offlineSystemClosure contains all packages needed for a tuinix system
+  isoImage.storeContents = lib.optionals (offlineSystemClosure != null) [
+    offlineSystemClosure
+  ] ++ (with pkgs; [
+    # Additional packages that might not be in the reference config
+    # but are useful during installation
     networkmanager
     vim
     git
@@ -50,22 +53,7 @@ in {
     # Boot and filesystem tools
     grub2
     efibootmgr
-    # Kernel and firmware - essential for any install
-    linuxPackages.kernel
-    linux-firmware
-    # System utilities
-    systemd
-    dbus
-    pam
-    shadow
-    util-linux
-    coreutils
-    bash
-    # Nix itself for the installed system
-    nix
-    # Home-manager for user configuration
-    home-manager
-  ];
+  ]);
 
   # Include build dependencies so offline rebuilds work better
   system.includeBuildDependencies = true;
